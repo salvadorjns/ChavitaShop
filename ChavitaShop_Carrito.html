@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Carrito de Compras</title>
+    <style>
+        /* Estilos para los botones de productos (personalízalos) */
+        .btn-agregar {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        /* Estilos para el carrito flotante */
+        #carrito-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            width: 250px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Script del carrito (funciones clave) -->
+    <script>
+        let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        let total = parseFloat(localStorage.getItem('total')) || 0;
+
+        function agregarAlCarrito(nombre, precio, imagen) {
+            const productoExistente = carrito.find(item => item.nombre === nombre);
+            if (productoExistente) {
+                productoExistente.cantidad += 1;
+            } else {
+                carrito.push({ nombre, precio, imagen, cantidad: 1 });
+            }
+            total += precio;
+            guardarEnStorage();
+            actualizarCarritoUI();
+        }
+
+        function guardarEnStorage() {
+            localStorage.setItem('carrito', JSON.stringify(carrito));
+            localStorage.setItem('total', total.toString());
+        }
+
+        function actualizarCarritoUI() {
+            const contador = document.getElementById('contador-items');
+            const totalElement = document.getElementById('total-carrito');
+            contador.textContent = carrito.reduce((acc, item) => acc + item.cantidad, 0);
+            totalElement.textContent = total.toFixed(2);
+        }
+
+        window.onload = actualizarCarritoUI;
+    </script>
+
+    <!-- HTML del carrito (se incrustará en Google Sites) -->
+    <div id="carrito-widget">
+        <h3>🛒 Carrito (<span id="contador-items">0</span>)</h3>
+        <p>Total: $<span id="total-carrito">0.00</span></p>
+    </div>
+</body>
+</html>
