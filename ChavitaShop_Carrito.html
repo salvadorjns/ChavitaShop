@@ -3,73 +3,83 @@
 <head>
     <title>Carrito de Compras</title>
     <style>
-        /* Estilos para los botones de productos (personalízalos) */
-        .btn-agregar {
-            background: #ff6b6b;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        /* Estilos para el carrito flotante */
-        #carrito-widget {
+        #carrito-container {
             position: fixed;
             bottom: 20px;
             right: 20px;
+            width: 300px;
             background: white;
-            padding: 15px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            width: 250px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            padding: 15px;
             z-index: 1000;
+        }
+        .item-carrito {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .btn-eliminar {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            border-radius: 3px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <!-- Script del carrito (funciones clave) -->
+    <div id="carrito-container">
+        <h2>🛒 Carrito (<span id="contador">0</span>)</h2>
+        <div id="lista-carrito"></div>
+        <p>Total: $<span id="total">0.00</span></p>
+    </div>
+
     <script>
+        // Cargar carrito desde localStorage
         let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
         let total = parseFloat(localStorage.getItem('total')) || 0;
 
-        function agregarAlCarrito(nombre, precio, imagen) {
-            const productoExistente = carrito.find(item => item.nombre === nombre);
-            if (productoExistente) {
-                productoExistente.cantidad += 1;
-            } else {
-                carrito.push({ nombre, precio, imagen, cantidad: 1 });
-            }
-            total += precio;
-            guardarEnStorage();
-            actualizarCarritoUI();
+        // Actualizar interfaz del carrito
+        function actualizarCarrito() {
+            document.getElementById('contador').textContent = 
+                carrito.reduce((sum, item) => sum + item.cantidad, 0);
+            
+            document.getElementById('total').textContent = 
+                total.toFixed(2);
+            
+            const lista = document.getElementById('lista-carrito');
+            lista.innerHTML = carrito.map(item => `
+                <div class="item-carrito">
+                    <span>${item.nombre} (${item.cantidad})</span>
+                    <span>$${(item.precio * item.cantidad).toFixed(2)}</span>
+                </div>
+            `).join('');
         }
 
-        function guardarEnStorage() {
-            localStorage.setItem('carrito', JSON.stringify(carrito));
-            localStorage.setItem('total', total.toString());
-        }
-
-        function actualizarCarritoUI() {
-            const contador = document.getElementById('contador-items');
-            const totalElement = document.getElementById('total-carrito');
-            contador.textContent = carrito.reduce((acc, item) => acc + item.cantidad, 0);
-            totalElement.textContent = total.toFixed(2);
-        }
-
-        window.onload = actualizarCarritoUI;
-
-            // Añade esto al final del script:
-        window.addEventListener('message', function(event) {
-            if (event.data && event.data.action === 'agregarAlCarrito') {
-                agregarAlCarrito(event.data.nombre, event.data.precio, event.data.imagen);
+        // Escuchar mensajes de los botones
+        window.addEventListener('message', (event) => {
+            if (event.data.action === 'agregarAlCarrito') {
+                const { nombre, precio } = event.data;
+                const itemExistente = carrito.find(item => item.nombre === nombre);
+                
+                if (itemExistente) {
+                    itemExistente.cantidad++;
+                } else {
+                    carrito.push({ nombre, precio, cantidad: 1 });
+                }
+                
+                total += precio;
+                localStorage.setItem('carrito', JSON.stringify(carrito));
+                localStorage.setItem('total', total.toString());
+                actualizarCarrito();
             }
         });
-    </script>
 
-    <!-- HTML del carrito (se incrustará en Google Sites) -->
-    <div id="carrito-widget">
-        <h3>🛒 Carrito (<span id="contador-items">0</span>)</h3>
-        <p>Total: $<span id="total-carrito">0.00</span></p>
-    </div>
+        // Inicializar
+        actualizarCarrito();
+    </script>
 </body>
 </html>
