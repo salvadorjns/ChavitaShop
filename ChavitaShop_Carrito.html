@@ -1,25 +1,135 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Carrito de Compras</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChavitaShop - Tienda Erótica</title>
     <style>
-        #carrito-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 300px;
+        :root {
+            --color-primario: #ff6b6b;
+            --color-secundario: #ff8e8e;
+            --color-fondo: #fff5f5;
+            --color-texto: #333;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-fondo);
+            color: var(--color-texto);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 0;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: var(--color-primario);
+            text-align: center;
+        }
+        
+        .productos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+            padding: 20px;
+        }
+        
+        .producto {
             background: white;
             border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .producto:hover {
+            transform: translateY(-5px);
+        }
+        
+        .producto-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .producto-info {
             padding: 15px;
+        }
+        
+        .producto-titulo {
+            font-size: 1.2rem;
+            margin: 0 0 10px;
+        }
+        
+        .producto-precio {
+            font-weight: bold;
+            color: var(--color-primario);
+            font-size: 1.3rem;
+            margin: 10px 0;
+        }
+        
+        .btn-agregar {
+            background: var(--color-primario);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .btn-agregar:hover {
+            background: var(--color-secundario);
+        }
+        
+        /* Carrito de compras */
+        #carrito-widget {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.15);
+            width: 300px;
             z-index: 1000;
         }
+        
+        #carrito-widget h2 {
+            margin-top: 0;
+            color: var(--color-primario);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #lista-carrito {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+        
         .item-carrito {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 8px 0;
             border-bottom: 1px solid #eee;
         }
+        
         .btn-eliminar {
             background: #ff4757;
             color: white;
@@ -28,58 +138,190 @@
             border-radius: 3px;
             cursor: pointer;
         }
+        
+        #total-carrito {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .btn-pagar {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .productos {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            #carrito-widget {
+                position: static;
+                width: auto;
+                margin-top: 30px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div id="carrito-container">
-        <h2>🛒 Carrito (<span id="contador">0</span>)</h2>
+    <header>
+        <div class="container">
+            <h1>ChavitaShop</h1>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="productos">
+            <!-- Producto 1 -->
+            <div class="producto">
+                <img src="https://via.placeholder.com/300x200?text=Consolador" alt="Consolador Realista" class="producto-img">
+                <div class="producto-info">
+                    <h3 class="producto-titulo">Consolador Realista</h3>
+                    <p class="producto-descripcion">Material suave y flexible, ideal para...</p>
+                    <p class="producto-precio">$29.99</p>
+                    <button class="btn-agregar" onclick="agregarAlCarrito('Consolador Realista', 29.99, 'https://via.placeholder.com/300x200?text=Consolador')">
+                        Añadir al carrito
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Producto 2 -->
+            <div class="producto">
+                <img src="https://via.placeholder.com/300x200?text=Vibrador" alt="Vibrador con Ventosa" class="producto-img">
+                <div class="producto-info">
+                    <h3 class="producto-titulo">Vibrador con Ventosa</h3>
+                    <p class="producto-descripcion">Potente y con base de succión para...</p>
+                    <p class="producto-precio">$24.99</p>
+                    <button class="btn-agregar" onclick="agregarAlCarrito('Vibrador con Ventosa', 24.99, 'https://via.placeholder.com/300x200?text=Vibrador')">
+                        Añadir al carrito
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Añade más productos según necesites -->
+        </div>
+    </div>
+    
+    <!-- Widget del Carrito -->
+    <div id="carrito-widget">
+        <h2>🛒 Carrito (<span id="contador-items">0</span>)</h2>
         <div id="lista-carrito"></div>
-        <p>Total: $<span id="total">0.00</span></p>
+        <p>Total: $<span id="total-carrito">0.00</span></p>
+        <button class="btn-pagar" onclick="finalizarCompra()">Finalizar Compra</button>
     </div>
 
     <script>
-        // Cargar carrito desde localStorage
+        // Variables globales
         let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
         let total = parseFloat(localStorage.getItem('total')) || 0;
-
-        // Actualizar interfaz del carrito
-        function actualizarCarrito() {
-            document.getElementById('contador').textContent = 
-                carrito.reduce((sum, item) => sum + item.cantidad, 0);
+        
+        // Función para agregar productos al carrito
+        function agregarAlCarrito(nombre, precio, imagen) {
+            const productoExistente = carrito.find(item => item.nombre === nombre);
             
-            document.getElementById('total').textContent = 
-                total.toFixed(2);
-            
-            const lista = document.getElementById('lista-carrito');
-            lista.innerHTML = carrito.map(item => `
-                <div class="item-carrito">
-                    <span>${item.nombre} (${item.cantidad})</span>
-                    <span>$${(item.precio * item.cantidad).toFixed(2)}</span>
-                </div>
-            `).join('');
-        }
-
-        // Escuchar mensajes de los botones
-        window.addEventListener('message', (event) => {
-            if (event.data.action === 'agregarAlCarrito') {
-                const { nombre, precio } = event.data;
-                const itemExistente = carrito.find(item => item.nombre === nombre);
-                
-                if (itemExistente) {
-                    itemExistente.cantidad++;
-                } else {
-                    carrito.push({ nombre, precio, cantidad: 1 });
-                }
-                
-                total += precio;
-                localStorage.setItem('carrito', JSON.stringify(carrito));
-                localStorage.setItem('total', total.toString());
-                actualizarCarrito();
+            if (productoExistente) {
+                productoExistente.cantidad += 1;
+            } else {
+                carrito.push({ 
+                    nombre, 
+                    precio, 
+                    imagen,
+                    cantidad: 1
+                });
             }
-        });
-
-        // Inicializar
-        actualizarCarrito();
+            
+            total += precio;
+            guardarEnStorage();
+            actualizarCarritoUI();
+            
+            // Animación de confirmación
+            const boton = event.target;
+            boton.textContent = "✓ Añadido";
+            setTimeout(() => {
+                boton.textContent = "Añadir al carrito";
+            }, 1000);
+        }
+        
+        // Función para eliminar items del carrito
+        function eliminarDelCarrito(index) {
+            total -= carrito[index].precio * carrito[index].cantidad;
+            carrito.splice(index, 1);
+            guardarEnStorage();
+            actualizarCarritoUI();
+        }
+        
+        // Actualiza la interfaz del carrito
+        function actualizarCarritoUI() {
+            const lista = document.getElementById('lista-carrito');
+            const totalElement = document.getElementById('total-carrito');
+            const contador = document.getElementById('contador-items');
+            
+            lista.innerHTML = '';
+            
+            if (carrito.length === 0) {
+                lista.innerHTML = '<p>Tu carrito está vacío</p>';
+                totalElement.textContent = '0.00';
+                contador.textContent = '0';
+                return;
+            }
+            
+            carrito.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item-carrito';
+                
+                itemDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <img src="${item.imagen}" width="40" height="40" style="border-radius: 5px; object-fit: cover;">
+                        <div>
+                            <p style="margin: 0; font-weight: bold;">${item.nombre}</p>
+                            <p style="margin: 0; font-size: 0.9rem;">${item.cantidad} x $${item.precio.toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <p style="margin: 0; font-weight: bold;">$${(item.precio * item.cantidad).toFixed(2)}</p>
+                        <button class="btn-eliminar" onclick="eliminarDelCarrito(${index})">Eliminar</button>
+                    </div>
+                `;
+                
+                lista.appendChild(itemDiv);
+            });
+            
+            totalElement.textContent = total.toFixed(2);
+            contador.textContent = carrito.reduce((acc, item) => acc + item.cantidad, 0);
+        }
+        
+        // Guarda el carrito en localStorage
+        function guardarEnStorage() {
+            localStorage.setItem('carrito', JSON.stringify(carrito));
+            localStorage.setItem('total', total.toString());
+        }
+        
+        // Función para finalizar la compra
+        function finalizarCompra() {
+            if (carrito.length === 0) {
+                alert("¡Tu carrito está vacío!");
+                return;
+            }
+            
+            // Aquí puedes implementar la conexión con Google Sheets
+            alert(`Pedido realizado! Total: $${total.toFixed(2)}\nPronto nos contactaremos contigo.`);
+            
+            // Limpiar carrito después de comprar
+            localStorage.removeItem('carrito');
+            localStorage.removeItem('total');
+            carrito = [];
+            total = 0;
+            actualizarCarritoUI();
+        }
+        
+        // Inicializar el carrito al cargar la página
+        window.onload = actualizarCarritoUI;
     </script>
 </body>
 </html>
