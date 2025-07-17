@@ -1,53 +1,160 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Carrito de Compras</title>
+    <title>Tienda Erótica - Carrito</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .productos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
         .producto {
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin: 10px;
-            display: inline-block;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            width: 200px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .producto img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .btn-agregar {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        .btn-agregar:hover {
+            background: #ff5252;
         }
         #carrito {
-            margin-top: 20px;
-            border: 1px solid #ccc;
-            padding: 10px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .item-carrito {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .btn-eliminar {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        #total {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <h2>Tienda Online</h2>
+    <h1>🔥 Productos Eróticos</h1>
     
-    <!-- Producto 1 -->
-    <div class="producto">
-        <h3>Consolador Realista</h3>
-        <p>$29.99</p>
-        <button onclick="agregarAlCarrito('Consolador Realista', 29.99)">Añadir al carrito</button>
+    <div class="productos">
+        <!-- Producto 1 -->
+        <div class="producto">
+            <img src="https://via.placeholder.com/200x150?text=Consolador" alt="Consolador Realista">
+            <h3>Consolador Realista</h3>
+            <p>$29.99</p>
+            <button class="btn-agregar" onclick="agregarAlCarrito('Consolador Realista', 29.99, 'https://via.placeholder.com/200x150?text=Consolador')">
+                Añadir al carrito
+            </button>
+        </div>
+        
+        <!-- Producto 2 -->
+        <div class="producto">
+            <img src="https://via.placeholder.com/200x150?text=Vibrador" alt="Vibrador con Ventosa">
+            <h3>Vibrador con Ventosa</h3>
+            <p>$24.99</p>
+            <button class="btn-agregar" onclick="agregarAlCarrito('Vibrador con Ventosa', 24.99, 'https://via.placeholder.com/200x150?text=Vibrador')">
+                Añadir al carrito
+            </button>
+        </div>
+        
+        <!-- Producto 3 -->
+        <div class="producto">
+            <img src="https://via.placeholder.com/200x150?text=Anillo" alt="Anillo Vibrador">
+            <h3>Anillo Vibrador</h3>
+            <p>$19.99</p>
+            <button class="btn-agregar" onclick="agregarAlCarrito('Anillo Vibrador', 19.99, 'https://via.placeholder.com/200x150?text=Anillo')">
+                Añadir al carrito
+            </button>
+        </div>
     </div>
     
-    <!-- Producto 2 -->
-    <div class="producto">
-        <h3>Vibrador con Ventosa</h3>
-        <p>$24.99</p>
-        <button onclick="agregarAlCarrito('Vibrador con Ventosa', 24.99)">Añadir al carrito</button>
-    </div>
-    
-    <!-- Carrito -->
     <div id="carrito">
-        <h3>Tu Carrito 🛒</h3>
-        <ul id="lista-carrito"></ul>
-        <p>Total: $<span id="total">0.00</span></p>
-        <button onclick="pagar()">Pagar con PayPal</button>
+        <h2>🛒 Tu Carrito</h2>
+        <div id="lista-carrito"></div>
+        <p id="total">Total: $0.00</p>
+        <button onclick="enviarPedido()" style="background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+            Finalizar Compra
+        </button>
     </div>
 
     <script>
-        let carrito = [];
-        let total = 0;
+        let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        let total = parseFloat(localStorage.getItem('total')) || 0;
+        
+        // Cargar carrito al iniciar
+        window.onload = function() {
+            actualizarCarrito();
+        };
 
-        function agregarAlCarrito(nombre, precio) {
-            carrito.push({ nombre, precio });
+        function agregarAlCarrito(nombre, precio, imagen) {
+            // Verificar si el producto ya está en el carrito
+            const productoExistente = carrito.find(item => item.nombre === nombre);
+            
+            if (productoExistente) {
+                productoExistente.cantidad += 1;
+            } else {
+                carrito.push({ 
+                    nombre, 
+                    precio, 
+                    imagen,
+                    cantidad: 1
+                });
+            }
+            
             total += precio;
+            guardarEnStorage();
+            actualizarCarrito();
+            
+            // Animación de confirmación
+            const boton = event.target;
+            boton.textContent = "✓ Añadido";
+            setTimeout(() => {
+                boton.textContent = "Añadir al carrito";
+            }, 1000);
+        }
+
+        function eliminarDelCarrito(index) {
+            total -= carrito[index].precio * carrito[index].cantidad;
+            carrito.splice(index, 1);
+            guardarEnStorage();
             actualizarCarrito();
         }
 
@@ -56,19 +163,55 @@
             const totalElement = document.getElementById('total');
             
             lista.innerHTML = '';
-            carrito.forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = `${item.nombre} - $${item.precio.toFixed(2)}`;
-                lista.appendChild(li);
+            
+            if (carrito.length === 0) {
+                lista.innerHTML = '<p>Tu carrito está vacío</p>';
+                totalElement.textContent = '0.00';
+                return;
+            }
+            
+            carrito.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item-carrito';
+                
+                itemDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <img src="${item.imagen}" width="50" height="50" style="border-radius: 5px;">
+                        <div>
+                            <p style="margin: 0; font-weight: bold;">${item.nombre}</p>
+                            <p style="margin: 0;">${item.cantidad} x $${item.precio.toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <p style="margin: 0; font-weight: bold;">$${(item.precio * item.cantidad).toFixed(2)}</p>
+                        <button class="btn-eliminar" onclick="eliminarDelCarrito(${index})">Eliminar</button>
+                    </div>
+                `;
+                
+                lista.appendChild(itemDiv);
             });
             
             totalElement.textContent = total.toFixed(2);
         }
 
-        function pagar() {
-            // Redirigir a PayPal con el total (ejemplo básico)
-            const paypalLink = `https://www.paypal.com/checkoutnow?amount=${total}`;
-            window.open(paypalLink, '_blank');
+        function guardarEnStorage() {
+            localStorage.setItem('carrito', JSON.stringify(carrito));
+            localStorage.setItem('total', total.toString());
+        }
+
+        function enviarPedido() {
+            if (carrito.length === 0) {
+                alert("¡Tu carrito está vacío!");
+                return;
+            }
+            
+            // Aquí iría el código para enviar a Google Sheets
+            alert("Pedido enviado con éxito. ¡Gracias por tu compra!");
+            localStorage.removeItem('carrito');
+            localStorage.removeItem('total');
+            carrito = [];
+            total = 0;
+            actualizarCarrito();
         }
     </script>
 </body>
