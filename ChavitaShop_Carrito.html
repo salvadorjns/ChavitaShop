@@ -57,6 +57,13 @@
         }
 
         window.onload = actualizarCarritoUI;
+
+            // Añade esto al final del script:
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.action === 'agregarAlCarrito') {
+                agregarAlCarrito(event.data.nombre, event.data.precio, event.data.imagen);
+            }
+        });
     </script>
 
     <!-- HTML del carrito (se incrustará en Google Sites) -->
