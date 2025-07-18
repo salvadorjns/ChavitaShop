@@ -4,43 +4,21 @@
   <meta charset="UTF-8">
   <title>Carrito de Compras</title>
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f4f4f4;
-    }
-    #contenedorCarrito div {
-      display: flex;
-      align-items: center;
-      background: white;
-      margin: 10px;
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    }
-    .producto-info {
-      flex-grow: 1;
-      margin-left: 10px;
-    }
-    .precio {
-      font-weight: bold;
-    }
+    body { font-family: Arial; background: #fff; padding: 20px; }
+    .producto { border-bottom: 1px solid #ccc; padding: 10px 0; display: flex; gap: 10px; }
+    .producto img { width: 80px; }
+    .producto-info { flex: 1; }
+    .precio { font-weight: bold; }
   </style>
 </head>
 <body>
-  <h1>Tu Carrito</h1>
-  <div id="contenedorCarrito">Cargando...</div>
+  <h2>🛒 Tu Carrito</h2>
+  <div id="contenedorCarrito"></div>
 
   <script>
     function obtenerProductosDeCookies() {
       const match = document.cookie.match(/productos=([^;]+)/);
       return match ? JSON.parse(decodeURIComponent(match[1])) : [];
-    }
-
-    function guardarProductosEnCookies(productos) {
-      const d = new Date();
-      d.setTime(d.getTime() + 7 * 24 * 60 * 60 * 1000);
-      const expires = "expires=" + d.toUTCString();
-      document.cookie = "productos=" + encodeURIComponent(JSON.stringify(productos)) + ";" + expires + ";path=/";
     }
 
     function actualizarCarrito() {
@@ -55,8 +33,9 @@
 
       productos.forEach(p => {
         const div = document.createElement("div");
+        div.className = "producto";
         div.innerHTML = `
-          <img src="${p.imagen}" width="80" alt="${p.nombre}">
+          <img src="${p.imagen}" alt="${p.nombre}">
           <div class="producto-info">${p.nombre}</div>
           <div class="precio">$${p.precio.toFixed(2)}</div>
         `;
@@ -64,18 +43,7 @@
       });
     }
 
-    // Escucha mensajes (opcional para Opción C)
-    window.addEventListener("message", function (event) {
-      if (event.data?.tipo === "agregarProducto") {
-        const producto = event.data.producto;
-        let productos = obtenerProductosDeCookies();
-        productos.push(producto);
-        guardarProductosEnCookies(productos);
-        actualizarCarrito();
-      }
-    });
-
-    window.onload = actualizarCarrito;
+    actualizarCarrito();
   </script>
 </body>
 </html>
