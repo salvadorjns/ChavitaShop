@@ -2,166 +2,54 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Carrito - ChavitaShop</title>
+  <title>Carrito</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      padding: 20px;
-      margin: 0;
-    }
-    #carrito-container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .producto-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 15px;
-      padding: 15px;
-      background: #fff;
-      border: 1px solid #eee;
-      border-radius: 8px;
-    }
-    .producto-imagen {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      margin-right: 15px;
-      border-radius: 4px;
-    }
-    .producto-info {
-      flex-grow: 1;
-    }
-    .producto-nombre {
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #e83e8c;
-    }
-    .producto-precio {
-      color: #666;
-    }
-    .carrito-vacio {
-      text-align: center;
-      padding: 30px;
-      color: #888;
-    }
-    .carrito-total {
-      font-weight: bold;
-      font-size: 1.2em;
-      text-align: right;
-      margin-top: 20px;
-      padding-top: 15px;
-      border-top: 1px solid #eee;
-    }
+    body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
+    .producto { border: 1px solid #ccc; margin: 10px; padding: 10px; background: white; display: flex; gap: 10px; }
+    img { width: 150px; }
   </style>
 </head>
 <body>
-  <div id="carrito-container">
-    <h1>🛒 Tu Carrito de Compras</h1>
-    <div id="carrito">Cargando...</div>
-    <div id="total" class="carrito-total">Total: $0.00</div>
-  </div>
+  <h2>🛍️ Tu Carrito</h2>
+  <div id="carrito"></div>
 
   <script>
-    // Función para agregar productos al carrito
-    function agregarAlCarrito(nombre, precio, imagen, id) {
-      let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
-      
-      // Verificar si el producto ya existe
-      const productoExistente = carrito.find(item => item.id === id);
-      
-      if (productoExistente) {
-        productoExistente.cantidad += 1;
-      } else {
-        carrito.push({ 
-          id,
-          nombre, 
-          precio, 
-          imagen,
-          cantidad: 1
-        });
-      }
-      
-      localStorage.setItem('carrito', JSON.stringify(carrito));
-      actualizarCarrito();
-      
-      // Mostrar notificación
-      mostrarNotificacion(`${nombre} agregado al carrito`);
+    function getCookie(name) {
+      const value = "; " + document.cookie;
+      const parts = value.split("; " + name + "=");
+      if (parts.length === 2) return parts.pop().split(";").shift();
     }
 
-    // Función para actualizar la visualización del carrito
-    function actualizarCarrito() {
-      const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
-      const contenedor = document.getElementById('carrito');
-      const totalElement = document.getElementById('total');
-      
-      if (carrito.length === 0) {
-        contenedor.innerHTML = '<div class="carrito-vacio"><p>Tu carrito está vacío</p></div>';
-        totalElement.textContent = 'Total: $0.00';
+    function mostrarCarrito() {
+      const carritoDiv = document.getElementById('carrito');
+      const cookieCarrito = getCookie("carrito");
+
+      if (!cookieCarrito) {
+        carritoDiv.innerHTML = "<p>El carrito está vacío.</p>";
         return;
       }
 
-      // Calcular total
-      const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
-      
-      // Mostrar productos
-      contenedor.innerHTML = carrito.map(item => `
-        <div class="producto-item">
-          <img src="${item.imagen}" class="producto-imagen">
-          <div class="producto-info">
-            <div class="producto-nombre">${item.nombre} (x${item.cantidad})</div>
-            <div class="producto-precio">$${item.precio.toFixed(2)} c/u</div>
-          </div>
-          <button onclick="eliminarDelCarrito('${item.id}')">🗑️</button>
-        </div>
-      `).join('');
-      
-      totalElement.textContent = `Total: $${total.toFixed(2)}`;
-    }
-
-    // Función para eliminar productos
-    function eliminarDelCarrito(id) {
-      let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
-      carrito = carrito.filter(item => item.id !== id);
-      localStorage.setItem('carrito', JSON.stringify(carrito));
-      actualizarCarrito();
-      mostrarNotificacion('Producto eliminado');
-    }
-
-    // Función para mostrar notificaciones
-    function mostrarNotificacion(mensaje) {
-      const notificacion = document.createElement('div');
-      notificacion.style.position = 'fixed';
-      notificacion.style.bottom = '20px';
-      notificacion.style.right = '20px';
-      notificacion.style.backgroundColor = '#e83e8c';
-      notificacion.style.color = 'white';
-      notificacion.style.padding = '10px 20px';
-      notificacion.style.borderRadius = '5px';
-      notificacion.style.zIndex = '1000';
-      notificacion.textContent = mensaje;
-      document.body.appendChild(notificacion);
-      
-      setTimeout(() => {
-        notificacion.remove();
-      }, 2000);
-    }
-
-    // Escuchar mensajes de los botones
-    window.addEventListener('message', function(event) {
-      if (event.data && event.data.action === 'agregar-al-carrito') {
-        const { nombre, precio, imagen, id } = event.data;
-        agregarAlCarrito(nombre, precio, imagen, id);
+      const carrito = JSON.parse(decodeURIComponent(cookieCarrito));
+      if (carrito.length === 0) {
+        carritoDiv.innerHTML = "<p>El carrito está vacío.</p>";
+        return;
       }
-    });
 
-    // Inicializar al cargar
-    window.onload = actualizarCarrito;
+      carrito.forEach(producto => {
+        const div = document.createElement('div');
+        div.className = 'producto';
+        div.innerHTML = `
+          <img src="${producto.imagen}" alt="${producto.nombre}">
+          <div>
+            <h4>${producto.nombre}</h4>
+            <p>Precio: $${producto.precio.toFixed(2)}</p>
+          </div>
+        `;
+        carritoDiv.appendChild(div);
+      });
+    }
+
+    mostrarCarrito();
   </script>
 </body>
 </html>
