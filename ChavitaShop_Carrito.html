@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrito de Compras</title>
+    <title>Carrito de Compras - ChavitaShop</title>
     <style>
         :root {
             --color-primario: #e83e8c;
@@ -279,29 +279,29 @@
     </div>
 
     <script>
-        // Base de datos de productos y stock
-        const inventario = {
-            'Lubricante Íntimo': { stock: 15, precio: 19.99 },
-            'Consolador Realista': { stock: 10, precio: 29.99 },
-            'Vibrador con Ventosa': { stock: 8, precio: 24.99 }
-        };
+        // Configuración de claves
+        const CARRITO_KEY = 'chavita-shop-carrito-v2';
+        const TOTAL_KEY = 'chavita-shop-total-v2';
+        const ULTIMA_ACT_KEY = 'chavita-shop-ultima-act';
 
         // Estado del carrito
         let carrito = [];
         let total = 0;
-        let versionCarrito = 0;
+        let ultimaActualizacion = 0;
+
+        // Elementos UI
+        const listaCarrito = document.getElementById('lista-carrito');
+        const contador = document.getElementById('contador');
+        const totalElement = document.getElementById('total');
+        const btnPagar = document.getElementById('btn-pagar');
 
         // Mostrar notificación
         function mostrarNotificacion(mensaje, esError = false) {
             const notificacion = document.createElement('div');
             notificacion.className = `notificacion ${esError ? 'error' : ''}`;
-            notificacion.innerHTML = `
-                <span>${mensaje}</span>
-            `;
-            
+            notificacion.innerHTML = `<span>${mensaje}</span>`;
             document.body.appendChild(notificacion);
             
-            // Eliminar después de la animación
             setTimeout(() => {
                 notificacion.remove();
             }, 3000);
@@ -309,85 +309,68 @@
 
         // Cargar carrito desde localStorage
         function cargarCarrito() {
-            const datos = localStorage.getItem('carritoData');
-            if (datos) {
-                try {
-                    const { carrito: carritoGuardado, total: totalGuardado, version } = JSON.parse(datos);
+            const carritoData = localStorage.getItem(CARRITO_KEY);
+            const totalData = localStorage.getItem(TOTAL_KEY);
+            const ultimaActData = localStorage.getItem(ULTIMA_ACT_KEY);
+
+            try {
+                if (carritoData) {
+                    const nuevaUltimaAct = parseInt(ultimaActData) || 0;
                     
-                    // Solo actualizar si la versión es más reciente
-                    if (version > versionCarrito) {
-                        carrito = carritoGuardado || [];
-                        total = parseFloat(totalGuardado) || 0;
-                        versionCarrito = version;
+                    if (nuevaUltimaAct > ultimaActualizacion) {
+                        carrito = JSON.parse(carritoData);
+                        total = parseFloat(totalData) || 0;
+                        ultimaActualizacion = nuevaUltimaAct;
                         actualizarCarritoUI();
                     }
-                } catch (e) {
-                    console.error('Error al cargar carrito:', e);
                 }
+            } catch (e) {
+                console.error('Error al cargar carrito:', e);
             }
         }
 
         // Guardar carrito en localStorage
         function guardarCarrito() {
-            versionCarrito++;
-            const datos = {
-                carrito,
-                total,
-                version: versionCarrito
-            };
-            localStorage.setItem('carritoData', JSON.stringify(datos));
+            ultimaActualizacion = Date.now();
+            localStorage.setItem(CARRITO_KEY, JSON.stringify(carrito));
+            localStorage.setItem(TOTAL_KEY, total.toString());
+            localStorage.setItem(ULTIMA_ACT_KEY, ultimaActualizacion.toString());
             
-            // Disparar evento personalizado para otros tabs/iframes
-            const event = new CustomEvent('carritoActualizado', {
-                detail: { version: versionCarrito }
-            });
-            window.dispatchEvent(event);
+            // Disparar evento de storage
+            window.dispatchEvent(new Event('storage'));
         }
 
         // Actualizar interfaz del carrito
         function actualizarCarritoUI() {
-            const lista = document.getElementById('lista-carrito');
-            const contador = document.getElementById('contador');
-            const totalElement = document.getElementById('total');
-            const btnPagar = document.getElementById('btn-pagar');
-            
             // Actualizar contador
             const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
             contador.textContent = totalItems;
             
             // Actualizar lista
             if (carrito.length === 0) {
-                lista.innerHTML = `
+                listaCarrito.innerHTML = `
                     <div class="carrito-vacio">
                         <p>Tu carrito está vacío</p>
                         <p>¡Agrega productos para comenzar!</p>
                     </div>
                 `;
             } else {
-                lista.innerHTML = carrito.map((item, index) => {
-                    const producto = inventario[item.nombre];
-                    const disponible = producto ? producto.stock - item.cantidad : 0;
-                    
-                    return `
-                        <div class="item-carrito">
-                            <div class="item-info">
-                                <div class="item-nombre">${item.nombre}</div>
-                                <div class="item-detalles">
-                                    <span>$${producto ? producto.precio.toFixed(2) : '0.00'} c/u</span>
-                                    ${disponible >= 0 ? 
-                                        `<span class="stock-disponible">${disponible} disponibles</span>` : 
-                                        `<span class="stock-agotado">Stock excedido</span>`}
-                                </div>
-                            </div>
-                            <div class="item-cantidad">
-                                <button class="btn-cantidad" onclick="modificarCantidad(${index}, -1)">-</button>
-                                <span>${item.cantidad}</span>
-                                <button class="btn-cantidad" onclick="modificarCantidad(${index}, 1)" ${disponible <= 0 ? 'disabled style="opacity:0.5"' : ''}>+</button>
-                                <button class="btn-eliminar" onclick="eliminarProducto(${index})">Eliminar</button>
+                listaCarrito.innerHTML = carrito.map((item, index) => `
+                    <div class="item-carrito">
+                        <div class="item-info">
+                            <div class="item-nombre">${item.nombre}</div>
+                            <div class="item-detalles">
+                                <span>$${item.precio.toFixed(2)} c/u</span>
                             </div>
                         </div>
-                    `;
-                }).join('');
+                        <div class="item-cantidad">
+                            <button class="btn-cantidad" onclick="modificarCantidad(${index}, -1)">-</button>
+                            <span>${item.cantidad}</span>
+                            <button class="btn-cantidad" onclick="modificarCantidad(${index}, 1)">+</button>
+                            <button class="btn-eliminar" onclick="eliminarProducto(${index})">Eliminar</button>
+                        </div>
+                    </div>
+                `).join('');
             }
             
             // Actualizar total
@@ -402,30 +385,15 @@
         // Modificar cantidad de un producto
         function modificarCantidad(index, cambio) {
             const item = carrito[index];
-            const producto = inventario[item.nombre];
-            
-            if (!producto) {
-                mostrarNotificacion('Producto no disponible', true);
-                return;
-            }
-            
             const nuevaCantidad = item.cantidad + cambio;
             
-            // Verificar si se elimina el producto
             if (nuevaCantidad <= 0) {
                 eliminarProducto(index);
                 return;
             }
             
-            // Verificar stock
-            if (nuevaCantidad > producto.stock) {
-                mostrarNotificacion(`No hay suficiente stock. Máximo: ${producto.stock}`, true);
-                return;
-            }
-            
-            // Actualizar
             item.cantidad = nuevaCantidad;
-            total += cambio * producto.precio;
+            total += cambio * item.precio;
             
             guardarCarrito();
             actualizarCarritoUI();
@@ -434,14 +402,8 @@
 
         // Eliminar producto del carrito
         function eliminarProducto(index) {
-            const item = carrito[index];
-            const producto = inventario[item.nombre];
-            
-            if (producto) {
-                total -= item.cantidad * producto.precio;
-            }
-            
-            carrito.splice(index, 1);
+            const [item] = carrito.splice(index, 1);
+            total -= item.precio * item.cantidad;
             
             guardarCarrito();
             actualizarCarritoUI();
@@ -452,26 +414,7 @@
         function finalizarCompra() {
             if (carrito.length === 0) return;
             
-            // Verificar stock antes de comprar
-            const sinStock = carrito.some(item => {
-                const producto = inventario[item.nombre];
-                return producto && item.cantidad > producto.stock;
-            });
-            
-            if (sinStock) {
-                mostrarNotificacion('Algunos productos exceden el stock disponible', true);
-                return;
-            }
-            
-            // Aquí deberías conectar con tu backend o Google Sheets
             mostrarNotificacion(`¡Compra exitosa por $${total.toFixed(2)}!`);
-            
-            // Actualizar stock (en un sistema real esto lo haría el backend)
-            carrito.forEach(item => {
-                if (inventario[item.nombre]) {
-                    inventario[item.nombre].stock -= item.cantidad;
-                }
-            });
             
             // Resetear carrito
             carrito = [];
@@ -480,20 +423,32 @@
             actualizarCarritoUI();
         }
 
-        // Escuchar eventos de actualización
-        window.addEventListener('carritoActualizado', cargarCarrito);
+        // Escuchar mensajes de los botones
+        window.addEventListener('message', function(event) {
+            if (event.data?.type === 'actualizar-carrito') {
+                if (event.origin === 'https://salvadorjns.github.io' || 
+                    event.origin === 'https://sites.google.com') {
+                    carrito = event.data.carrito;
+                    total = event.data.total;
+                    guardarCarrito();
+                    actualizarCarritoUI();
+                }
+            }
+        });
+
+        // Escuchar cambios en localStorage
         window.addEventListener('storage', cargarCarrito);
-        
-        // Configurar botón de pagar
-        document.getElementById('btn-pagar').addEventListener('click', finalizarCompra);
-        
-        // Inicializar
-        document.addEventListener('DOMContentLoaded', () => {
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
             cargarCarrito();
             
-            // Verificar cambios periódicamente (por si fallan los eventos)
-            setInterval(cargarCarrito, 2000);
+            // Verificación periódica como respaldo
+            setInterval(cargarCarrito, 1000);
         });
+
+        // Configurar botón de pagar
+        btnPagar.addEventListener('click', finalizarCompra);
     </script>
 </body>
 </html>
