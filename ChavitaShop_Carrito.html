@@ -3,292 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrito de Compras - ChavitaShop</title>
+    <title>Carrito de Compras</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-        }
-        
-        #carrito-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-        }
-        
-        h1 {
-            color: #e83e8c;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        #lista-carrito {
-            margin-bottom: 30px;
-        }
-        
-        .item-carrito {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            transition: background 0.3s;
-        }
-        
-        .item-carrito:hover {
-            background-color: #f9f9f9;
-        }
-        
-        .item-info {
-            flex: 1;
-        }
-        
-        .item-nombre {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #333;
-        }
-        
-        .item-precio {
-            color: #e83e8c;
-            font-size: 0.9rem;
-        }
-        
-        .item-cantidad {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .btn-cantidad {
-            background: #f1f1f1;
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s;
-        }
-        
-        .btn-cantidad:hover {
-            background: #e2e2e2;
-        }
-        
-        .btn-eliminar {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 15px;
-            transition: background 0.3s;
-        }
-        
-        .btn-eliminar:hover {
-            background: #c82333;
-        }
-        
-        .carrito-total {
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.2rem;
-            font-weight: bold;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        
-        .btn-pagar {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 1.1rem;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-        
-        .btn-pagar:hover {
-            background: #218838;
-        }
-        
-        .btn-pagar:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
-        }
-        
-        .carrito-vacio {
-            text-align: center;
-            padding: 30px;
-            color: #6c757d;
-        }
-        
-        @media (max-width: 768px) {
-            #carrito-container {
-                padding: 15px;
-            }
-            
-            .item-carrito {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .item-cantidad {
-                margin-top: 10px;
-                width: 100%;
-                justify-content: space-between;
-            }
-        }
+        /* Estilos anteriores... */
     </style>
 </head>
 <body>
     <div id="carrito-container">
-        <h1>🛒 Tu Carrito de Compras</h1>
-        
-        <div id="lista-carrito">
-            <!-- Los productos del carrito aparecerán aquí -->
-        </div>
-        
-        <div class="carrito-total">
-            <span>Total:</span>
-            <span>$<span id="total-carrito">0.00</span></span>
-        </div>
-        
-        <button class="btn-pagar" id="btn-pagar" disabled>Finalizar Compra</button>
+        <h1>🛒 Tu Carrito (<span id="contador">0</span>)</h1>
+        <div id="lista-carrito"></div>
+        <p>Total: $<span id="total">0.00</span></p>
+        <button id="btn-pagar">Finalizar Compra</button>
     </div>
 
     <script>
         // Estado del carrito
-        let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-        let total = parseFloat(localStorage.getItem('total')) || 0;
-        
-        // Función para actualizar la interfaz del carrito
+        let carrito = [];
+        let total = 0;
+        let ultimaActualizacion = 0;
+
+        // Cargar carrito inicial
+        function cargarCarrito() {
+            const datos = localStorage.getItem('carrito');
+            if (datos) {
+                carrito = JSON.parse(datos);
+                total = parseFloat(localStorage.getItem('total')) || 0;
+                ultimaActualizacion = parseInt(localStorage.getItem('ultimaActualizacion')) || 0;
+            }
+            actualizarCarritoUI();
+        }
+
+        // Verificar cambios en el carrito
+        function verificarCambios() {
+            const nuevaActualizacion = parseInt(localStorage.getItem('ultimaActualizacion')) || 0;
+            
+            if (nuevaActualizacion > ultimaActualizacion) {
+                const datosCarrito = localStorage.getItem('carrito');
+                const datosTotal = localStorage.getItem('total');
+                
+                if (datosCarrito) {
+                    carrito = JSON.parse(datosCarrito);
+                    total = parseFloat(datosTotal) || 0;
+                    ultimaActualizacion = nuevaActualizacion;
+                    actualizarCarritoUI();
+                }
+            }
+        }
+
+        // Actualizar interfaz del carrito
         function actualizarCarritoUI() {
             const lista = document.getElementById('lista-carrito');
-            const totalElement = document.getElementById('total-carrito');
+            const contador = document.getElementById('contador');
+            const totalElement = document.getElementById('total');
             const btnPagar = document.getElementById('btn-pagar');
-            
-            // Vaciar lista
-            lista.innerHTML = '';
-            
-            // Si el carrito está vacío
-            if (carrito.length === 0) {
-                lista.innerHTML = `
-                    <div class="carrito-vacio">
-                        <p>Tu carrito está vacío</p>
-                        <p>¡Agrega productos para comenzar!</p>
-                    </div>
-                `;
-                totalElement.textContent = '0.00';
-                btnPagar.disabled = true;
-                return;
-            }
-            
-            // Mostrar cada producto del carrito
-            carrito.forEach((item, index) => {
-                const itemElement = document.createElement('div');
-                itemElement.className = 'item-carrito';
-                itemElement.innerHTML = `
-                    <div class="item-info">
-                        <div class="item-nombre">${item.nombre}</div>
-                        <div class="item-precio">$${item.precio.toFixed(2)} c/u</div>
-                    </div>
-                    <div class="item-cantidad">
-                        <button class="btn-cantidad" onclick="modificarCantidad(${index}, -1)">-</button>
-                        <span>${item.cantidad}</span>
-                        <button class="btn-cantidad" onclick="modificarCantidad(${index}, 1)">+</button>
-                        <button class="btn-eliminar" onclick="eliminarProducto(${index})">Eliminar</button>
-                    </div>
-                `;
-                lista.appendChild(itemElement);
-            });
-            
+
+            // Actualizar contador
+            contador.textContent = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+
+            // Actualizar lista
+            lista.innerHTML = carrito.map(item => `
+                <div class="item-carrito">
+                    <span>${item.nombre} x${item.cantidad}</span>
+                    <span>$${(item.precio * item.cantidad).toFixed(2)}</span>
+                </div>
+            `).join('');
+
             // Actualizar total
             totalElement.textContent = total.toFixed(2);
-            btnPagar.disabled = false;
+            btnPagar.disabled = carrito.length === 0;
         }
-        
-        // Función para modificar la cantidad de un producto
-        function modificarCantidad(index, cambio) {
-            const nuevaCantidad = carrito[index].cantidad + cambio;
-            
-            // Si la cantidad llega a 0, eliminar el producto
-            if (nuevaCantidad <= 0) {
-                eliminarProducto(index);
-                return;
-            }
-            
-            // Actualizar cantidad y total
-            total += cambio * carrito[index].precio;
-            carrito[index].cantidad = nuevaCantidad;
-            
-            guardarCarrito();
-            actualizarCarritoUI();
-        }
-        
-        // Función para eliminar un producto
-        function eliminarProducto(index) {
-            total -= carrito[index].precio * carrito[index].cantidad;
-            carrito.splice(index, 1);
-            
-            guardarCarrito();
-            actualizarCarritoUI();
-        }
-        
-        // Función para guardar el carrito en localStorage
-        function guardarCarrito() {
-            localStorage.setItem('carrito', JSON.stringify(carrito));
-            localStorage.setItem('total', total.toString());
-        }
-        
-        // Función para verificar cambios en el carrito
-        function verificarCarrito() {
-            const carritoActual = JSON.parse(localStorage.getItem('carrito'));
-            
-            // Si hay cambios en el carrito
-            if (JSON.stringify(carritoActual) !== JSON.stringify(carrito)) {
-                carrito = carritoActual || [];
-                total = parseFloat(localStorage.getItem('total')) || 0;
-                actualizarCarritoUI();
-            }
-        }
-        
-        // Función para finalizar la compra
-        function finalizarCompra() {
-            if (carrito.length === 0) return;
-            
-            // Aquí puedes implementar la conexión con Google Sheets
-            alert(`¡Compra realizada por $${total.toFixed(2)}!\nGracias por tu compra.`);
-            
-            // Vaciar el carrito
-            carrito = [];
-            total = 0;
-            guardarCarrito();
-            actualizarCarritoUI();
-        }
-        
-        // Configurar el botón de pagar
-        document.getElementById('btn-pagar').addEventListener('click', finalizarCompra);
-        
-        // Verificar cambios en el carrito cada segundo
-        setInterval(verificarCarrito, 1000);
-        
-        // Inicializar el carrito al cargar la página
-        window.onload = actualizarCarritoUI;
+
+        // Configurar intervalo para verificar cambios
+        setInterval(verificarCambios, 500);
+
+        // Inicializar
+        window.addEventListener('DOMContentLoaded', cargarCarrito);
+
+        // Finalizar compra
+        document.getElementById('btn-pagar').addEventListener('click', () => {
+            alert(`Compra realizada por $${total.toFixed(2)}`);
+            localStorage.removeItem('carrito');
+            localStorage.removeItem('total');
+            localStorage.setItem('ultimaActualizacion', Date.now().toString());
+            cargarCarrito();
+        });
     </script>
 </body>
 </html>
