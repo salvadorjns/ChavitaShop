@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Agregando al carrito...</title>
+  <script>
+    function enviarAlIframe() {
+      const params = new URLSearchParams(window.location.search);
+      const mensaje = {
+        add: params.get('add'),
+        nombre: params.get('nombre'),
+        precio: parseFloat(params.get('precio')),
+        imagen: params.get('imagen')
+      };
+
+      const iframe = window.opener || window.parent;
+      if (iframe) {
+        // Enviar el mensaje al iframe con el carrito
+        iframe.postMessage(mensaje, '*');
+      }
+
+      // Cerrar si es popup o volver atrás
+      if (window.opener) {
+        window.close();
+      } else {
+        window.location.href = "carrito.html"; // o redirige de nuevo al carrito si quieres
+      }
+    }
+
+    window.onload = enviarAlIframe;
+  </script>
+</head>
+<body>
+  <p>Agregando producto al carrito...</p>
+</body>
+</html>
