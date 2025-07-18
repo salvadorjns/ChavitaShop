@@ -120,8 +120,18 @@
         let total = parseFloat(localStorage.getItem('total')) || 0;
         
         // Cargar carrito al iniciar
-        window.onload = function() {
+        window.onload = function () {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('add') === '1') {
+            agregarAlCarrito(
+            params.get('nombre'),
+            parseFloat(params.get('precio')),
+            params.get('imagen')
+            );
+            history.replaceState({}, document.title, window.location.pathname);
+        } else {
             actualizarCarrito();
+        }
         };
 
         function agregarAlCarrito(nombre, precio, imagen) {
