@@ -227,6 +227,8 @@
       display: flex;
       justify-content: space-between;
       margin-top: 30px;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     
     .btn-carrito {
@@ -239,6 +241,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      flex: 1;
+      min-width: 200px;
     }
     
     .btn-vaciar {
@@ -249,6 +253,18 @@
     
     .btn-vaciar:hover {
       background: #e9ecef;
+    }
+    
+    .btn-direccion {
+      background: var(--secondary);
+      color: white;
+      box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
+    }
+    
+    .btn-direccion:hover {
+      background: #5d3daf;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(111, 66, 193, 0.4);
     }
     
     .btn-pagar {
@@ -288,6 +304,96 @@
     
     .stock-agotado {
       color: #dc3545;
+    }
+    
+    /* Modal de dirección */
+    #modal-direccion {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-contenido {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .modal-titulo {
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+    
+    .cerrar-modal {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--gray);
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    .form-group.required label::after {
+      content: ' *';
+      color: #dc3545;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .form-row .form-group {
+      flex: 1;
+    }
+    
+    .btn-guardar {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 20px;
+      width: 100%;
     }
     
     /* Animaciones */
@@ -338,7 +444,11 @@
       
       .btn-carrito {
         width: 100%;
-        margin-bottom: 10px;
+      }
+      
+      .form-row {
+        flex-direction: column;
+        gap: 0;
       }
     }
   </style>
@@ -371,9 +481,142 @@
       <button class="btn-carrito btn-vaciar" id="btn-vaciar-carrito">
         Vaciar Carrito
       </button>
+      <button class="btn-carrito btn-direccion" id="btn-direccion-envio">
+        Dirección de Envío
+      </button>
       <button class="btn-carrito btn-pagar" id="btn-pagar">
         Proceder al Pago
       </button>
+    </div>
+  </div>
+
+  <!-- Modal de Dirección de Envío -->
+  <div id="modal-direccion">
+    <div class="modal-contenido">
+      <div class="modal-header">
+        <h2 class="modal-titulo">Dirección de Envío</h2>
+        <button class="cerrar-modal" id="cerrar-modal">&times;</button>
+      </div>
+      
+      <form id="form-direccion">
+        <div class="form-group required">
+          <label for="nombre-completo">Nombre completo</label>
+          <input type="text" id="nombre-completo" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="empresa">Empresa (opcional)</label>
+          <input type="text" id="empresa">
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group required">
+            <label for="email">Email</label>
+            <input type="email" id="email" required>
+          </div>
+          
+          <div class="form-group required">
+            <label for="telefono">Teléfono</label>
+            <div style="display: flex;">
+              <select style="width: 80px; margin-right: 10px;">
+                <option>+52</option>
+              </select>
+              <input type="tel" id="telefono" required style="flex: 1;">
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group required">
+          <label for="pais">País</label>
+          <select id="pais" required>
+            <option value="MX" selected>México</option>
+          </select>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group required">
+            <label for="calle">Calle</label>
+            <input type="text" id="calle" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="numero">Número</label>
+            <input type="text" id="numero">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group required">
+            <label for="codigo-postal">Código postal</label>
+            <input type="text" id="codigo-postal" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="colonia">Colonia</label>
+            <input type="text" id="colonia">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group required">
+            <label for="ciudad">Ciudad</label>
+            <input type="text" id="ciudad" required>
+          </div>
+          
+          <div class="form-group required">
+            <label for="estado">Estado</label>
+            <select id="estado" required>
+              <option value="">Seleccione una opción</option>
+              <option value="AGU">Aguascalientes</option>
+              <option value="BCN">Baja California</option>
+              <option value="BCS">Baja California Sur</option>
+              <option value="CAM">Campeche</option>
+              <option value="CHP">Chiapas</option>
+              <option value="CHH">Chihuahua</option>
+              <option value="COA">Coahuila</option>
+              <option value="COL">Colima</option>
+              <option value="DIF">Ciudad de México</option>
+              <option value="DUR">Durango</option>
+              <option value="GUA">Guanajuato</option>
+              <option value="GRO">Guerrero</option>
+              <option value="HID">Hidalgo</option>
+              <option value="JAL">Jalisco</option>
+              <option value="MEX">Estado de México</option>
+              <option value="MIC">Michoacán</option>
+              <option value="MOR">Morelos</option>
+              <option value="NAY">Nayarit</option>
+              <option value="NLE">Nuevo León</option>
+              <option value="OAX">Oaxaca</option>
+              <option value="PUE">Puebla</option>
+              <option value="QUE">Querétaro</option>
+              <option value="ROO">Quintana Roo</option>
+              <option value="SLP">San Luis Potosí</option>
+              <option value="SIN">Sinaloa</option>
+              <option value="SON">Sonora</option>
+              <option value="TAB">Tabasco</option>
+              <option value="TAM">Tamaulipas</option>
+              <option value="TLA">Tlaxcala</option>
+              <option value="VER">Veracruz</option>
+              <option value="YUC">Yucatán</option>
+              <option value="ZAC">Zacatecas</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rfc">RFC (opcional)</label>
+            <input type="text" id="rfc">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="referencia">Referencia de dirección (opcional)</label>
+          <input type="text" id="referencia">
+        </div>
+        
+        <button type="submit" class="btn-guardar">Guardar Dirección</button>
+      </form>
     </div>
   </div>
 
@@ -386,6 +629,7 @@
     
     // 1. Estado inicial del carrito
     let carrito = JSON.parse(localStorage.getItem('carrito-chavita')) || [];
+    let direccionEnvio = JSON.parse(localStorage.getItem('direccion-envio')) || null;
     
     // 2. Función para actualizar la visualización
     function actualizarCarrito() {
@@ -508,7 +752,7 @@
       actualizarCarrito();
     }
     
-    // 4. Configuración del botón Vaciar Carrito (FUNCIONAL)
+    // 4. Configuración del botón Vaciar Carrito
     document.getElementById('btn-vaciar-carrito').addEventListener('click', function() {
       if (confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
         carrito = [];
@@ -517,7 +761,48 @@
       }
     });
     
-    // 5. Configuración del botón Pagar
+    // 5. Configuración del botón Dirección de Envío
+    document.getElementById('btn-direccion-envio').addEventListener('click', function() {
+      document.getElementById('modal-direccion').style.display = 'flex';
+    });
+    
+    document.getElementById('cerrar-modal').addEventListener('click', function() {
+      document.getElementById('modal-direccion').style.display = 'none';
+    });
+    
+    // 6. Configuración del formulario de dirección
+    document.getElementById('form-direccion').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Obtener valores del formulario
+      direccionEnvio = {
+        nombreCompleto: document.getElementById('nombre-completo').value,
+        empresa: document.getElementById('empresa').value,
+        email: document.getElementById('email').value,
+        telefono: document.getElementById('telefono').value,
+        pais: document.getElementById('pais').value,
+        calle: document.getElementById('calle').value,
+        numero: document.getElementById('numero').value,
+        codigoPostal: document.getElementById('codigo-postal').value,
+        colonia: document.getElementById('colonia').value,
+        ciudad: document.getElementById('ciudad').value,
+        estado: document.getElementById('estado').value,
+        rfc: document.getElementById('rfc').value,
+        referencia: document.getElementById('referencia').value,
+        fecha: new Date().toISOString()
+      };
+      
+      // Guardar en localStorage
+      localStorage.setItem('direccion-envio', JSON.stringify(direccionEnvio));
+      
+      // Cerrar modal
+      document.getElementById('modal-direccion').style.display = 'none';
+      
+      // Mostrar confirmación
+      alert('Dirección de envío guardada correctamente');
+    });
+    
+    // 7. Configuración del botón Pagar
     document.getElementById('btn-pagar').addEventListener('click', function() {
       if (carrito.length === 0) return;
       
@@ -533,25 +818,52 @@
       
       if (sinStock) return;
       
-      // Redirección a pasarela de pagos (simulada)
-      const total = calcularTotal();
-      alert(`Redirigiendo a pasarela de pagos. Total: $${total.toFixed(2)}`);
-      // window.location.href = 'https://pasarela-de-pagos.com?total=' + total;
+      // Validar dirección de envío
+      if (!direccionEnvio) {
+        alert('Por favor ingresa tu dirección de envío antes de pagar');
+        document.getElementById('modal-direccion').style.display = 'flex';
+        return;
+      }
       
-      // Vaciar carrito después de pagar
+      // Crear objeto de orden
+      const orden = {
+        productos: carrito,
+        direccion: direccionEnvio,
+        subtotal: calcularSubtotal(),
+        envio: calcularEnvio(),
+        total: calcularTotal(),
+        fecha: new Date().toISOString()
+      };
+      
+      // Enviar a servidor (simulado)
+      console.log('Orden generada:', orden);
+      
+      // Redirección a pasarela de pagos (simulada)
+      alert(`Redirigiendo a pasarela de pagos. Total: $${orden.total.toFixed(2)}`);
+      
+      // Aquí iría la lógica real de pago
+      // window.location.href = 'https://pasarela-de-pagos.com?total=' + orden.total;
+      
+      // Vaciar carrito después de pagar (simulado)
       carrito = [];
       localStorage.setItem('carrito-chavita', JSON.stringify([]));
       actualizarCarrito();
     });
     
-    // 6. Funciones de cálculo
-    function calcularTotal() {
-      const subtotal = carrito.reduce((sum, item) => sum + (item.precio * (item.cantidad || 1)), 0);
-      const envio = subtotal < 899 ? 200 : 0;
-      return subtotal + envio;
+    // 8. Funciones de cálculo
+    function calcularSubtotal() {
+      return carrito.reduce((sum, item) => sum + (item.precio * (item.cantidad || 1)), 0);
     }
     
-    // 7. Comunicación con iframe
+    function calcularEnvio() {
+      return calcularSubtotal() < 899 ? 200 : 0;
+    }
+    
+    function calcularTotal() {
+      return calcularSubtotal() + calcularEnvio();
+    }
+    
+    // 9. Comunicación con iframe
     window.addEventListener('message', function(event) {
       // IMPORTANTE: En producción, verifica event.origin para seguridad
       // if (event.origin !== "https://tudominio.com") return;
@@ -580,7 +892,7 @@
       }
     });
     
-    // 8. Inicialización
+    // 10. Inicialización
     window.addEventListener('DOMContentLoaded', function() {
       actualizarCarrito();
       
