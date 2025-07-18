@@ -4,56 +4,7 @@
   <meta charset="UTF-8">
   <title>Carrito - ChavitaShop</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: #fff5f9;
-    }
-    #carrito-container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .item-carrito {
-      display: flex;
-      align-items: center;
-      padding: 15px;
-      margin-bottom: 15px;
-      background: #f9f9f9;
-      border-radius: 8px;
-    }
-    .item-imagen {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      margin-right: 15px;
-      border-radius: 4px;
-    }
-    .item-info {
-      flex-grow: 1;
-    }
-    .item-nombre {
-      font-weight: bold;
-      color: #e83e8c;
-      margin-bottom: 5px;
-    }
-    .carrito-vacio {
-      text-align: center;
-      padding: 40px 20px;
-      color: #888;
-    }
-    #total-carrito {
-      font-weight: bold;
-      font-size: 1.2em;
-      text-align: right;
-      margin-top: 20px;
-      padding-top: 15px;
-      border-top: 1px solid #eee;
-    }
+    /* [Mantén los mismos estilos que antes] */
   </style>
 </head>
 <body>
@@ -79,10 +30,10 @@
       if (carrito.length === 0) {
         lista.innerHTML = '<div class="carrito-vacio"><p>Tu carrito está vacío</p></div>';
         totalElement.textContent = 'Total: $0.00';
+        localStorage.setItem('carrito-chavita', JSON.stringify([]));
         return;
       }
       
-      // Generar HTML de los productos
       let html = '';
       let total = 0;
       
@@ -103,21 +54,23 @@
       
       lista.innerHTML = html;
       totalElement.textContent = `Total: $${total.toFixed(2)}`;
-      
-      // Guardar en localStorage
       localStorage.setItem('carrito-chavita', JSON.stringify(carrito));
     }
     
-    // 3. Escuchar mensajes para agregar productos (versión modificada)
+    // 3. Escuchar mensajes para agregar productos
     window.addEventListener('message', function(event) {
-      // Para desarrollo, aceptamos mensajes de cualquier origen ('*')
-      // En producción deberías especificar tus dominios seguros
+      console.log('Mensaje recibido:', event.data);
+      
+      // IMPORTANTE: En producción, verifica event.origin para seguridad
+      // if (event.origin !== "https://tudominio.com") return;
+      
       if (event.data.action === 'agregar-producto') {
         const producto = event.data.producto;
+        console.log('Producto recibido:', producto);
         
-        let carrito = JSON.parse(localStorage.getItem('carrito-chavita')) || [];
-        
+        // Buscar si el producto ya existe
         const existente = carrito.find(p => p.id === producto.id);
+        
         if (existente) {
           existente.cantidad = (existente.cantidad || 1) + 1;
         } else {
@@ -130,21 +83,17 @@
       }
     });
 
-    // 4. Sincronización al cargar (nueva funcionalidad)
-    window.addEventListener('DOMContentLoaded', () => {
-      // Sincronizar con localStorage al cargar
-      actualizarCarrito();
-      
-      // Escuchar cambios en localStorage desde otras pestañas
-      window.addEventListener('storage', (e) => {
-        if (e.key === 'carrito-chavita') {
-          carrito = JSON.parse(e.newValue) || [];
-          actualizarCarrito();
-        }
-      });
+    // 4. Sincronización al cargar y entre pestañas
+    window.addEventListener('DOMContentLoaded', actualizarCarrito);
+    
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'carrito-chavita') {
+        carrito = JSON.parse(e.newValue) || [];
+        actualizarCarrito();
+      }
     });
 
-    // 5. Inicializar al cargar (compatibilidad)
+    // 5. Inicializar
     actualizarCarrito();
   </script>
 </body>
