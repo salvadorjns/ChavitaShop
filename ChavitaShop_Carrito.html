@@ -1,55 +1,103 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Carrito</title>
+  <meta charset="UTF-8" />
+  <title>Carrito de Compras - ChavitaShop</title>
   <style>
-    body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
-    .producto { border: 1px solid #ccc; margin: 10px; padding: 10px; background: white; display: flex; gap: 10px; }
-    img { width: 150px; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background: #fff5f9;
+      color: #333;
+    }
+    h1 {
+      color: #e83e8c;
+      text-align: center;
+    }
+    #contenedorCarrito div {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    #contenedorCarrito img {
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(232, 62, 140, 0.3);
+    }
+    .producto-info {
+      flex: 1;
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+    .precio {
+      color: #e83e8c;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <h2>🛍️ Tu Carrito</h2>
-  <div id="carrito"></div>
+
+  <h1>🛒 Tu Carrito de Compras</h1>
+  <div id="contenedorCarrito">Cargando productos...</div>
 
   <script>
-    function getCookie(name) {
-      const value = "; " + document.cookie;
-      const parts = value.split("; " + name + "=");
-      if (parts.length === 2) return parts.pop().split(";").shift();
+    // Leer cookies como objeto JSON
+    function obtenerProductosDeCookies() {
+      const match = document.cookie.match(/productos=([^;]+)/);
+      return match ? JSON.parse(decodeURIComponent(match[1])) : [];
     }
 
-    function mostrarCarrito() {
-      const carritoDiv = document.getElementById('carrito');
-      const cookieCarrito = getCookie("carrito");
+    // Guardar productos en cookies
+    function guardarProductosEnCookies(productos) {
+      // Guardamos cookie por 7 días
+      const d = new Date();
+      d.setTime(d.getTime() + (7*24*60*60*1000));
+      const expires = "expires="+ d.toUTCString();
+      document.cookie = "productos=" + encodeURIComponent(JSON.stringify(productos)) + ";" + expires + ";path=/";
+    }
 
-      if (!cookieCarrito) {
-        carritoDiv.innerHTML = "<p>El carrito está vacío.</p>";
+    // Función para renderizar el carrito
+    function actualizarCarrito() {
+      const productos = obtenerProductosDeCookies();
+      const contenedor = document.getElementById("contenedorCarrito");
+      contenedor.innerHTML = "";
+
+      if(productos.length === 0) {
+        contenedor.innerHTML = "<p>Tu carrito está vacío.</p>";
         return;
       }
 
-      const carrito = JSON.parse(decodeURIComponent(cookieCarrito));
-      if (carrito.length === 0) {
-        carritoDiv.innerHTML = "<p>El carrito está vacío.</p>";
-        return;
-      }
-
-      carrito.forEach(producto => {
-        const div = document.createElement('div');
-        div.className = 'producto';
+      productos.forEach(p => {
+        const div = document.createElement("div");
         div.innerHTML = `
-          <img src="${producto.imagen}" alt="${producto.nombre}">
-          <div>
-            <h4>${producto.nombre}</h4>
-            <p>Precio: $${producto.precio.toFixed(2)}</p>
-          </div>
+          <img src="${p.imagen}" width="100" height="80" alt="${p.nombre}" />
+          <div class="producto-info">${p.nombre}</div>
+          <div class="precio">$${p.precio.toFixed(2)}</div>
         `;
-        carritoDiv.appendChild(div);
+        contenedor.appendChild(div);
       });
     }
 
-    mostrarCarrito();
+    // Escuchar mensajes desde página padre para agregar productos
+    window.addEventListener("message", function(event) {
+      if(event.data?.tipo === "agregarProducto") {
+        const producto = event.data.producto;
+        let productos = obtenerProductosDeCookies();
+
+        productos.push(producto);
+        guardarProductosEnCookies(productos);
+
+        console.log("Producto agregado desde mensaje:", producto);
+        actualizarCarrito();
+      }
+    });
+
+    // Inicializar carrito al cargar la página
+    window.onload = actualizarCarrito;
   </script>
 </body>
 </html>
