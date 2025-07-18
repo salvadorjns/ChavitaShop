@@ -382,7 +382,6 @@
     const productosDB = {
       'prod-001': { stock: 10, nombre: 'Consolador Realista' },
       'prod-002': { stock: 15, nombre: 'Lubricante Íntimo' },
-      // Puedes agregar más productos aquí
     };
     
     // 1. Estado inicial del carrito
@@ -509,14 +508,16 @@
       actualizarCarrito();
     }
     
-    // 4. Event listeners
+    // 4. Configuración del botón Vaciar Carrito (FUNCIONAL)
     document.getElementById('btn-vaciar-carrito').addEventListener('click', function() {
       if (confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
         carrito = [];
+        localStorage.setItem('carrito-chavita', JSON.stringify([]));
         actualizarCarrito();
       }
     });
     
+    // 5. Configuración del botón Pagar
     document.getElementById('btn-pagar').addEventListener('click', function() {
       if (carrito.length === 0) return;
       
@@ -539,17 +540,18 @@
       
       // Vaciar carrito después de pagar
       carrito = [];
+      localStorage.setItem('carrito-chavita', JSON.stringify([]));
       actualizarCarrito();
     });
     
-    // 5. Funciones de cálculo
+    // 6. Funciones de cálculo
     function calcularTotal() {
       const subtotal = carrito.reduce((sum, item) => sum + (item.precio * (item.cantidad || 1)), 0);
       const envio = subtotal < 899 ? 200 : 0;
       return subtotal + envio;
     }
     
-    // 6. Comunicación con iframe
+    // 7. Comunicación con iframe
     window.addEventListener('message', function(event) {
       // IMPORTANTE: En producción, verifica event.origin para seguridad
       // if (event.origin !== "https://tudominio.com") return;
@@ -577,7 +579,6 @@
         }
       }
     });
-    
     
     // 8. Inicialización
     window.addEventListener('DOMContentLoaded', function() {
