@@ -5,49 +5,343 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito de Compras</title>
     <style>
-        /* Estilos anteriores... */
+        :root {
+            --color-primario: #e83e8c;
+            --color-secundario: #ff6b9e;
+            --color-fondo: #fff5f9;
+            --color-texto: #333;
+            --color-exito: #28a745;
+            --color-error: #dc3545;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--color-fondo);
+            color: var(--color-texto);
+        }
+        
+        #carrito-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .carrito-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .carrito-title {
+            color: var(--color-primario);
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .carrito-count {
+            background: var(--color-primario);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        #lista-carrito {
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .item-carrito {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border-radius: 10px;
+            animation: fadeIn 0.5s ease-out;
+            transition: all 0.3s;
+        }
+        
+        .item-carrito:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .item-info {
+            flex: 1;
+        }
+        
+        .item-nombre {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--color-primario);
+        }
+        
+        .item-detalles {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+        
+        .item-cantidad {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-cantidad {
+            background: white;
+            border: 1px solid #ddd;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .btn-cantidad:hover {
+            background: var(--color-primario);
+            color: white;
+            border-color: var(--color-primario);
+        }
+        
+        .btn-eliminar {
+            background: var(--color-error);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 15px;
+            transition: background 0.3s;
+        }
+        
+        .btn-eliminar:hover {
+            background: #c82333;
+        }
+        
+        .carrito-footer {
+            border-top: 2px solid #f0f0f0;
+            padding-top: 20px;
+        }
+        
+        .carrito-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+        
+        .btn-pagar {
+            background: var(--color-exito);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-pagar:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-pagar:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .carrito-vacio {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+        
+        /* Notificación */
+        .notificacion {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--color-exito);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.5s forwards, fadeOut 0.5s forwards 2.5s;
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        
+        .notificacion.error {
+            background: var(--color-error);
+        }
+        
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        @media (max-width: 768px) {
+            #carrito-container {
+                padding: 15px;
+            }
+            
+            .carrito-title {
+                font-size: 1.4rem;
+            }
+            
+            .item-carrito {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .item-cantidad {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
     </style>
 </head>
 <body>
     <div id="carrito-container">
-        <h1>🛒 Tu Carrito (<span id="contador">0</span>)</h1>
-        <div id="lista-carrito"></div>
-        <p>Total: $<span id="total">0.00</span></p>
-        <button id="btn-pagar">Finalizar Compra</button>
+        <div class="carrito-header">
+            <h1 class="carrito-title">Tu Carrito</h1>
+            <div class="carrito-count" id="contador">0</div>
+        </div>
+        
+        <div id="lista-carrito">
+            <div class="carrito-vacio">
+                <p>Tu carrito está vacío</p>
+                <p>¡Agrega productos para comenzar!</p>
+            </div>
+        </div>
+        
+        <div class="carrito-footer">
+            <div class="carrito-total">
+                <span>Total:</span>
+                <span>$<span id="total">0.00</span></span>
+            </div>
+            <button class="btn-pagar" id="btn-pagar" disabled>Finalizar Compra</button>
+        </div>
     </div>
 
     <script>
+        // Base de datos de productos y stock
+        const inventario = {
+            'Lubricante Íntimo': { stock: 15, precio: 19.99 },
+            'Consolador Realista': { stock: 10, precio: 29.99 },
+            'Vibrador con Ventosa': { stock: 8, precio: 24.99 }
+        };
+
         // Estado del carrito
         let carrito = [];
         let total = 0;
-        let ultimaActualizacion = 0;
+        let versionCarrito = 0;
 
-        // Cargar carrito inicial
-        function cargarCarrito() {
-            const datos = localStorage.getItem('carrito');
-            if (datos) {
-                carrito = JSON.parse(datos);
-                total = parseFloat(localStorage.getItem('total')) || 0;
-                ultimaActualizacion = parseInt(localStorage.getItem('ultimaActualizacion')) || 0;
-            }
-            actualizarCarritoUI();
+        // Mostrar notificación
+        function mostrarNotificacion(mensaje, esError = false) {
+            const notificacion = document.createElement('div');
+            notificacion.className = `notificacion ${esError ? 'error' : ''}`;
+            notificacion.innerHTML = `
+                <span>${mensaje}</span>
+            `;
+            
+            document.body.appendChild(notificacion);
+            
+            // Eliminar después de la animación
+            setTimeout(() => {
+                notificacion.remove();
+            }, 3000);
         }
 
-        // Verificar cambios en el carrito
-        function verificarCambios() {
-            const nuevaActualizacion = parseInt(localStorage.getItem('ultimaActualizacion')) || 0;
-            
-            if (nuevaActualizacion > ultimaActualizacion) {
-                const datosCarrito = localStorage.getItem('carrito');
-                const datosTotal = localStorage.getItem('total');
-                
-                if (datosCarrito) {
-                    carrito = JSON.parse(datosCarrito);
-                    total = parseFloat(datosTotal) || 0;
-                    ultimaActualizacion = nuevaActualizacion;
-                    actualizarCarritoUI();
+        // Cargar carrito desde localStorage
+        function cargarCarrito() {
+            const datos = localStorage.getItem('carritoData');
+            if (datos) {
+                try {
+                    const { carrito: carritoGuardado, total: totalGuardado, version } = JSON.parse(datos);
+                    
+                    // Solo actualizar si la versión es más reciente
+                    if (version > versionCarrito) {
+                        carrito = carritoGuardado || [];
+                        total = parseFloat(totalGuardado) || 0;
+                        versionCarrito = version;
+                        actualizarCarritoUI();
+                    }
+                } catch (e) {
+                    console.error('Error al cargar carrito:', e);
                 }
             }
+        }
+
+        // Guardar carrito en localStorage
+        function guardarCarrito() {
+            versionCarrito++;
+            const datos = {
+                carrito,
+                total,
+                version: versionCarrito
+            };
+            localStorage.setItem('carritoData', JSON.stringify(datos));
+            
+            // Disparar evento personalizado para otros tabs/iframes
+            const event = new CustomEvent('carritoActualizado', {
+                detail: { version: versionCarrito }
+            });
+            window.dispatchEvent(event);
         }
 
         // Actualizar interfaz del carrito
@@ -56,36 +350,149 @@
             const contador = document.getElementById('contador');
             const totalElement = document.getElementById('total');
             const btnPagar = document.getElementById('btn-pagar');
-
+            
             // Actualizar contador
-            contador.textContent = carrito.reduce((sum, item) => sum + item.cantidad, 0);
-
+            const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+            contador.textContent = totalItems;
+            
             // Actualizar lista
-            lista.innerHTML = carrito.map(item => `
-                <div class="item-carrito">
-                    <span>${item.nombre} x${item.cantidad}</span>
-                    <span>$${(item.precio * item.cantidad).toFixed(2)}</span>
-                </div>
-            `).join('');
-
+            if (carrito.length === 0) {
+                lista.innerHTML = `
+                    <div class="carrito-vacio">
+                        <p>Tu carrito está vacío</p>
+                        <p>¡Agrega productos para comenzar!</p>
+                    </div>
+                `;
+            } else {
+                lista.innerHTML = carrito.map((item, index) => {
+                    const producto = inventario[item.nombre];
+                    const disponible = producto ? producto.stock - item.cantidad : 0;
+                    
+                    return `
+                        <div class="item-carrito">
+                            <div class="item-info">
+                                <div class="item-nombre">${item.nombre}</div>
+                                <div class="item-detalles">
+                                    <span>$${producto ? producto.precio.toFixed(2) : '0.00'} c/u</span>
+                                    ${disponible >= 0 ? 
+                                        `<span class="stock-disponible">${disponible} disponibles</span>` : 
+                                        `<span class="stock-agotado">Stock excedido</span>`}
+                                </div>
+                            </div>
+                            <div class="item-cantidad">
+                                <button class="btn-cantidad" onclick="modificarCantidad(${index}, -1)">-</button>
+                                <span>${item.cantidad}</span>
+                                <button class="btn-cantidad" onclick="modificarCantidad(${index}, 1)" ${disponible <= 0 ? 'disabled style="opacity:0.5"' : ''}>+</button>
+                                <button class="btn-eliminar" onclick="eliminarProducto(${index})">Eliminar</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
             // Actualizar total
             totalElement.textContent = total.toFixed(2);
             btnPagar.disabled = carrito.length === 0;
+            
+            // Efecto visual
+            contador.classList.add('pulse');
+            setTimeout(() => contador.classList.remove('pulse'), 500);
         }
 
-        // Configurar intervalo para verificar cambios
-        setInterval(verificarCambios, 500);
+        // Modificar cantidad de un producto
+        function modificarCantidad(index, cambio) {
+            const item = carrito[index];
+            const producto = inventario[item.nombre];
+            
+            if (!producto) {
+                mostrarNotificacion('Producto no disponible', true);
+                return;
+            }
+            
+            const nuevaCantidad = item.cantidad + cambio;
+            
+            // Verificar si se elimina el producto
+            if (nuevaCantidad <= 0) {
+                eliminarProducto(index);
+                return;
+            }
+            
+            // Verificar stock
+            if (nuevaCantidad > producto.stock) {
+                mostrarNotificacion(`No hay suficiente stock. Máximo: ${producto.stock}`, true);
+                return;
+            }
+            
+            // Actualizar
+            item.cantidad = nuevaCantidad;
+            total += cambio * producto.precio;
+            
+            guardarCarrito();
+            actualizarCarritoUI();
+            mostrarNotificacion(`Cantidad actualizada: ${item.nombre} x${nuevaCantidad}`);
+        }
 
-        // Inicializar
-        window.addEventListener('DOMContentLoaded', cargarCarrito);
+        // Eliminar producto del carrito
+        function eliminarProducto(index) {
+            const item = carrito[index];
+            const producto = inventario[item.nombre];
+            
+            if (producto) {
+                total -= item.cantidad * producto.precio;
+            }
+            
+            carrito.splice(index, 1);
+            
+            guardarCarrito();
+            actualizarCarritoUI();
+            mostrarNotificacion(`${item.nombre} eliminado del carrito`);
+        }
 
         // Finalizar compra
-        document.getElementById('btn-pagar').addEventListener('click', () => {
-            alert(`Compra realizada por $${total.toFixed(2)}`);
-            localStorage.removeItem('carrito');
-            localStorage.removeItem('total');
-            localStorage.setItem('ultimaActualizacion', Date.now().toString());
+        function finalizarCompra() {
+            if (carrito.length === 0) return;
+            
+            // Verificar stock antes de comprar
+            const sinStock = carrito.some(item => {
+                const producto = inventario[item.nombre];
+                return producto && item.cantidad > producto.stock;
+            });
+            
+            if (sinStock) {
+                mostrarNotificacion('Algunos productos exceden el stock disponible', true);
+                return;
+            }
+            
+            // Aquí deberías conectar con tu backend o Google Sheets
+            mostrarNotificacion(`¡Compra exitosa por $${total.toFixed(2)}!`);
+            
+            // Actualizar stock (en un sistema real esto lo haría el backend)
+            carrito.forEach(item => {
+                if (inventario[item.nombre]) {
+                    inventario[item.nombre].stock -= item.cantidad;
+                }
+            });
+            
+            // Resetear carrito
+            carrito = [];
+            total = 0;
+            guardarCarrito();
+            actualizarCarritoUI();
+        }
+
+        // Escuchar eventos de actualización
+        window.addEventListener('carritoActualizado', cargarCarrito);
+        window.addEventListener('storage', cargarCarrito);
+        
+        // Configurar botón de pagar
+        document.getElementById('btn-pagar').addEventListener('click', finalizarCompra);
+        
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
             cargarCarrito();
+            
+            // Verificar cambios periódicamente (por si fallan los eventos)
+            setInterval(cargarCarrito, 2000);
         });
     </script>
 </body>
