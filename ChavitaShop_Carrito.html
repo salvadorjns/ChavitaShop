@@ -892,8 +892,80 @@
       }
     });
     
+    // ==============================================
+    // FUNCIONALIDAD RESPONSIVA DINÁMICA (NUEVO)
+    // ==============================================
+    
+    function ajustarCarritoPorDispositivo() {
+      const carritoContainer = document.getElementById('carrito-container');
+      const anchoPantalla = window.innerWidth;
+    
+      // Dispositivos móviles (ancho < 768px)
+      if (anchoPantalla < 768) {
+        carritoContainer.style.padding = '15px';
+        carritoContainer.style.maxWidth = '100%';
+        document.querySelector('h1').style.fontSize = '1.8rem';
+        
+        // Ajustar botones
+        const botones = document.querySelectorAll('.btn-carrito');
+        botones.forEach(btn => {
+          btn.style.padding = '10px 15px';
+          btn.style.minWidth = '100%';
+        });
+    
+        // Ajustar items del carrito
+        const items = document.querySelectorAll('.item-carrito');
+        items.forEach(item => {
+          item.style.padding = '15px';
+        });
+    
+        // Ajustar modal
+        const modal = document.querySelector('.modal-contenido');
+        if (modal) {
+          modal.style.width = '95%';
+          modal.style.padding = '20px';
+        }
+    
+      } 
+      // Tablets (768px - 991px)
+      else if (anchoPantalla >= 768 && anchoPantalla < 992) {
+        carritoContainer.style.padding = '25px';
+        carritoContainer.style.maxWidth = '90%';
+        document.querySelector('h1').style.fontSize = '2rem';
+        
+        // Ajustar botones
+        const botones = document.querySelectorAll('.btn-carrito');
+        botones.forEach(btn => {
+          btn.style.padding = '12px 20px';
+          btn.style.minWidth = '45%';
+        });
+    
+      } 
+      // Computadoras (≥ 992px)
+      else {
+        carritoContainer.style.padding = '30px';
+        carritoContainer.style.maxWidth = '800px';
+        document.querySelector('h1').style.fontSize = '2.2rem';
+        
+        // Ajustar botones
+        const botones = document.querySelectorAll('.btn-carrito');
+        botones.forEach(btn => {
+          btn.style.padding = '12px 25px';
+          btn.style.minWidth = '200px';
+        });
+      }
+    }
+    
+    // Optimización con debounce
+    let timeoutId;
+    function debounce(func, delay) {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(func, delay);
+    }
+    
     // 10. Inicialización
     window.addEventListener('DOMContentLoaded', function() {
+      ajustarCarritoPorDispositivo();
       actualizarCarrito();
       
       // Escuchar cambios en el localStorage desde otras pestañas
@@ -903,6 +975,9 @@
           actualizarCarrito();
         }
       });
+      
+      // Escuchar redimensionamiento con debounce
+      window.addEventListener('resize', () => debounce(ajustarCarritoPorDispositivo, 100));
     });
   </script>
 </body>
