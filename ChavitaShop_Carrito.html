@@ -11,38 +11,30 @@
   </style>
 </head>
 <body>
-  <h1>Carrito de Compras</h1>
-  <table id="carritoTabla">
-    <thead>
-      <tr><th>Producto</th><th>Cantidad</th><th>Eliminar</th></tr>
-    </thead>
-    <tbody id="carritoCuerpo"></tbody>
-  </table>
+  <h2>Carrito</h2>
+  <ul id="lista-carrito"></ul>
 
   <script>
-    const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-
-    function mostrarCarrito() {
-      const cuerpo = document.getElementById("carritoCuerpo");
-      cuerpo.innerHTML = "";
-      carrito.forEach((item, index) => {
-        const fila = document.createElement("tr");
-        fila.innerHTML = `
-          <td>${item.nombre}</td>
-          <td>${item.cantidad}</td>
-          <td><button onclick="eliminar(${index})">❌</button></td>
-        `;
-        cuerpo.appendChild(fila);
+    function mostrarCarrito(carrito) {
+      const lista = document.getElementById("lista-carrito");
+      lista.innerHTML = ""; // Limpia antes de agregar
+      carrito.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = `${item.nombre} (x${item.cantidad})`;
+        lista.appendChild(li);
       });
     }
 
-    function eliminar(index) {
-      carrito.splice(index, 1);
-      localStorage.setItem("carrito", JSON.stringify(carrito));
-      mostrarCarrito();
-    }
+    // Escuchar mensajes desde la página principal
+    window.addEventListener("message", (event) => {
+      if (event.data.type === "actualizarCarrito") {
+        mostrarCarrito(event.data.carrito);
+      }
+    });
 
-    window.addEventListener("load", mostrarCarrito);
+    // Mostrar el carrito al cargar por primera vez
+    const carritoInicial = JSON.parse(localStorage.getItem("carrito")) || [];
+    mostrarCarrito(carritoInicial);
   </script>
 </body>
 </html>
