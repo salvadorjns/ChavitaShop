@@ -1,164 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Tienda Erótica - Carrito</title>
-    <style>
-        /* (Estilos: mismos que ya tenías, sin cambios) */
-    </style>
+  <meta charset="UTF-8">
+  <title>Carrito - ChavitaShop</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    #carrito div {
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    img {
+      display: block;
+      margin-bottom: 5px;
+    }
+  </style>
 </head>
 <body>
-    <h1>🔥 Productos Eróticos 🔥</h1>
-    
-    <div class="productos">
-        <!-- Producto 1 -->
-        <div class="producto">
-            <img src="https://via.placeholder.com/200x150?text=Consolador" alt="Consolador Realista">
-            <h3>Consolador Realista</h3>
-            <p>$29.99</p>
-            <button class="btn-agregar" onclick="agregarAlCarrito('Consolador Realista', 29.99, 'https://via.placeholder.com/200x150?text=Consolador')">
-                Añadir al carrito
-            </button>
-        </div>
-        <!-- Producto 2 -->
-        <div class="producto">
-            <img src="https://via.placeholder.com/200x150?text=Vibrador" alt="Vibrador con Ventosa">
-            <h3>Vibrador con Ventosa</h3>
-            <p>$24.99</p>
-            <button class="btn-agregar" onclick="agregarAlCarrito('Vibrador con Ventosa', 24.99, 'https://via.placeholder.com/200x150?text=Vibrador')">
-                Añadir al carrito
-            </button>
-        </div>
-        <!-- Producto 3 -->
-        <div class="producto">
-            <img src="https://via.placeholder.com/200x150?text=Anillo" alt="Anillo Vibrador">
-            <h3>Anillo Vibrador</h3>
-            <p>$19.99</p>
-            <button class="btn-agregar" onclick="agregarAlCarrito('Anillo Vibrador', 19.99, 'https://via.placeholder.com/200x150?text=Anillo')">
-                Añadir al carrito
-            </button>
-        </div>
-    </div>
-    
-    <div id="carrito">
-        <h2>🛒 Tu Carrito</h2>
-        <div id="lista-carrito"></div>
-        <p id="total">Total: $0.00</p>
-        <button onclick="enviarPedido()" style="background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-            Finalizar Compra
-        </button>
-    </div>
+  <h1>🛒 Carrito de compras</h1>
 
-    <script>
-        let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-        let total = parseFloat(localStorage.getItem('total')) || 0;
+  <div id="carrito">Cargando...</div>
 
-        window.onload = function () {
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('add') === '1') {
-                agregarAlCarrito(
-                    params.get('nombre'),
-                    parseFloat(params.get('precio')),
-                    params.get('imagen')
-                );
-                history.replaceState({}, document.title, window.location.pathname);
-            } else {
-                actualizarCarrito();
-            }
-        };
+  <script>
+    function agregarAlCarrito(nombre, precio, imagen) {
+      const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+      carrito.push({ nombre, precio, imagen });
+      localStorage.setItem('carrito', JSON.stringify(carrito));
+      actualizarCarrito();
+    }
 
-        function agregarAlCarrito(nombre, precio, imagen) {
-            const productoExistente = carrito.find(item => item.nombre === nombre);
+    function actualizarCarrito() {
+      const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+      const contenedor = document.getElementById('carrito');
+      if (carrito.length === 0) {
+        contenedor.innerHTML = '<p>El carrito está vacío.</p>';
+        return;
+      }
 
-            if (productoExistente) {
-                productoExistente.cantidad += 1;
-            } else {
-                carrito.push({ nombre, precio, imagen, cantidad: 1 });
-            }
+      contenedor.innerHTML = carrito.map(item =>
+        `<div>
+          <img src="${item.imagen}" width="100"><br>
+          <strong>${item.nombre}</strong><br>
+          $${item.precio.toFixed(2)}
+        </div>`
+      ).join('');
+    }
 
-            total += precio;
-            guardarEnStorage();
-            actualizarCarrito();
+    // Escuchar mensajes externos (para iframe embebido en Google Sites)
+    window.addEventListener('message', function(event) {
+      const data = event.data;
+      if (data && data.add === '1') {
+        agregarAlCarrito(data.nombre, parseFloat(data.precio), data.imagen);
+      }
+    });
 
-            const boton = event?.target;
-            if (boton && boton.tagName === 'BUTTON') {
-                boton.textContent = "✓ Añadido";
-                setTimeout(() => {
-                    boton.textContent = "Añadir al carrito";
-                }, 1000);
-            }
-        }
-
-        function eliminarDelCarrito(index) {
-            total -= carrito[index].precio * carrito[index].cantidad;
-            carrito.splice(index, 1);
-            guardarEnStorage();
-            actualizarCarrito();
-        }
-
-        function actualizarCarrito() {
-            const lista = document.getElementById('lista-carrito');
-            const totalElement = document.getElementById('total');
-            
-            lista.innerHTML = '';
-            
-            if (carrito.length === 0) {
-                lista.innerHTML = '<p>Tu carrito está vacío</p>';
-                totalElement.textContent = '0.00';
-                return;
-            }
-            
-            carrito.forEach((item, index) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'item-carrito';
-                itemDiv.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <img src="${item.imagen}" width="50" height="50" style="border-radius: 5px;">
-                        <div>
-                            <p style="margin: 0; font-weight: bold;">${item.nombre}</p>
-                            <p style="margin: 0;">${item.cantidad} x $${item.precio.toFixed(2)}</p>
-                        </div>
-                    </div>
-                    <div>
-                        <p style="margin: 0; font-weight: bold;">$${(item.precio * item.cantidad).toFixed(2)}</p>
-                        <button class="btn-eliminar" onclick="eliminarDelCarrito(${index})">Eliminar</button>
-                    </div>
-                `;
-                lista.appendChild(itemDiv);
-            });
-
-            totalElement.textContent = total.toFixed(2);
-        }
-
-        function guardarEnStorage() {
-            localStorage.setItem('carrito', JSON.stringify(carrito));
-            localStorage.setItem('total', total.toString());
-        }
-
-        function enviarPedido() {
-            if (carrito.length === 0) {
-                alert("¡Tu carrito está vacío!");
-                return;
-            }
-            alert("Pedido enviado con éxito. ¡Gracias por tu compra!");
-            localStorage.removeItem('carrito');
-            localStorage.removeItem('total');
-            carrito = [];
-            total = 0;
-            actualizarCarrito();
-        }
-
-        // ⬇️ Comunicación con iframe usando postMessage
-        window.addEventListener("message", function(event) {
-            // Solo acepta mensajes del dominio de Google Sites
-            if (event.origin !== "https://sites.google.com") return;
-
-            const { nombre, precio, imagen } = event.data;
-
-            if (nombre && precio && imagen) {
-                agregarAlCarrito(nombre, precio, imagen);
-                actualizarCarrito();
-            }
-        });
-    </script>
+    // Al cargar la página
+    window.onload = actualizarCarrito;
+  </script>
 </body>
 </html>
