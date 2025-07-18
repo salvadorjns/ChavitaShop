@@ -3,98 +3,598 @@
 <head>
   <meta charset="UTF-8">
   <title>Carrito - ChavitaShop</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
   <style>
-    /* [Mantén los mismos estilos que antes] */
+    :root {
+      --primary: #e83e8c;
+      --secondary: #6f42c1;
+      --success: #28a745;
+      --dark: #343a40;
+      --light: #f8f9fa;
+      --gray: #6c757d;
+      --shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #f8f9fa 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    #carrito-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+      transform: translateY(0);
+      transition: all 0.3s ease;
+    }
+    
+    #carrito-container:hover {
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      transform: translateY(-5px);
+    }
+    
+    h1 {
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.2rem;
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+    
+    .carrito-vacio {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--gray);
+      animation: fadeIn 0.5s ease;
+    }
+    
+    .carrito-vacio p {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+    }
+    
+    .carrito-vacio .icono {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: var(--gray);
+      opacity: 0.5;
+    }
+    
+    .item-carrito {
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      margin-bottom: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      animation: fadeInUp 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .item-carrito:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    
+    .item-carrito::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 5px;
+      background: var(--primary);
+    }
+    
+    .item-imagen {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      margin-right: 20px;
+      border-radius: 8px;
+      border: 1px solid #eee;
+    }
+    
+    .item-info {
+      flex-grow: 1;
+    }
+    
+    .item-nombre {
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 5px;
+      font-size: 1.1rem;
+    }
+    
+    .item-precio {
+      color: var(--gray);
+      margin-bottom: 5px;
+    }
+    
+    .item-subtotal {
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    .controles-cantidad {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+    
+    .btn-cantidad {
+      width: 30px;
+      height: 30px;
+      border: none;
+      background: var(--light);
+      color: var(--dark);
+      font-weight: bold;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .btn-cantidad:hover {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .cantidad {
+      margin: 0 15px;
+      font-weight: 500;
+      min-width: 20px;
+      text-align: center;
+    }
+    
+    .btn-eliminar {
+      background: none;
+      border: none;
+      color: #dc3545;
+      cursor: pointer;
+      font-size: 1.2rem;
+      margin-left: 15px;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-eliminar:hover {
+      transform: scale(1.2);
+    }
+    
+    #resumen-carrito {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+    
+    .resumen-linea {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    
+    .resumen-titulo {
+      font-weight: 500;
+      color: var(--gray);
+    }
+    
+    .resumen-valor {
+      font-weight: 600;
+    }
+    
+    #total-carrito {
+      font-weight: bold;
+      font-size: 1.5rem;
+      text-align: right;
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 2px solid var(--primary);
+      color: var(--dark);
+    }
+    
+    #acciones-carrito {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+    
+    .btn-carrito {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .btn-vaciar {
+      background: #f8f9fa;
+      color: var(--gray);
+      border: 1px solid #dee2e6;
+    }
+    
+    .btn-vaciar:hover {
+      background: #e9ecef;
+    }
+    
+    .btn-pagar {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 15px rgba(232, 62, 140, 0.3);
+    }
+    
+    .btn-pagar:hover {
+      background: #d62f7c;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(232, 62, 140, 0.4);
+    }
+    
+    .btn-pagar:active {
+      transform: translateY(0);
+    }
+    
+    .envio-gratis {
+      color: var(--success);
+      font-weight: 600;
+    }
+    
+    .envio-costo {
+      color: var(--gray);
+    }
+    
+    .stock-disponible {
+      font-size: 0.9rem;
+      color: var(--gray);
+      margin-top: 5px;
+    }
+    
+    .stock-bajo {
+      color: #ffc107;
+    }
+    
+    .stock-agotado {
+      color: #dc3545;
+    }
+    
+    /* Animaciones */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .animate-added {
+      animation: bounce 0.5s;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      #carrito-container {
+        padding: 20px;
+      }
+      
+      .item-carrito {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .item-imagen {
+        margin-right: 0;
+        margin-bottom: 15px;
+      }
+      
+      #acciones-carrito {
+        flex-direction: column;
+      }
+      
+      .btn-carrito {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div id="carrito-container">
+  <div id="carrito-container" class="animate__animated animate__fadeIn">
     <h1>🛒 Tu Carrito de Compras</h1>
     <div id="lista-carrito">
       <div class="carrito-vacio">
+        <div class="icono">🛒</div>
         <p>Tu carrito está vacío</p>
+        <p>¡Agrega productos para comenzar!</p>
       </div>
     </div>
+    
+    <div id="resumen-carrito" style="display: none;">
+      <div class="resumen-linea">
+        <span class="resumen-titulo">Subtotal:</span>
+        <span class="resumen-valor" id="subtotal-carrito">$0.00</span>
+      </div>
+      <div class="resumen-linea">
+        <span class="resumen-titulo">Envío:</span>
+        <span class="resumen-valor" id="envio-carrito">$0.00</span>
+      </div>
+    </div>
+    
     <div id="total-carrito">Total: $0.00</div>
+    
+    <div id="acciones-carrito" style="display: none;">
+      <button class="btn-carrito btn-vaciar" id="btn-vaciar-carrito">
+        Vaciar Carrito
+      </button>
+      <button class="btn-carrito btn-pagar" id="btn-pagar">
+        Proceder al Pago
+      </button>
+    </div>
   </div>
 
   <script>
+    // Base de datos simulada de productos con stock
+    const productosDB = {
+      'prod-001': { stock: 10, nombre: 'Consolador Realista' },
+      'prod-002': { stock: 15, nombre: 'Lubricante Íntimo' },
+      // Puedes agregar más productos aquí
+    };
+    
     // 1. Estado inicial del carrito
     let carrito = JSON.parse(localStorage.getItem('carrito-chavita')) || [];
     
     // 2. Función para actualizar la visualización
     function actualizarCarrito() {
       const lista = document.getElementById('lista-carrito');
+      const subtotalElement = document.getElementById('subtotal-carrito');
+      const envioElement = document.getElementById('envio-carrito');
       const totalElement = document.getElementById('total-carrito');
+      const resumenElement = document.getElementById('resumen-carrito');
+      const accionesElement = document.getElementById('acciones-carrito');
       
       if (carrito.length === 0) {
-        lista.innerHTML = '<div class="carrito-vacio"><p>Tu carrito está vacío</p></div>';
+        lista.innerHTML = `
+          <div class="carrito-vacio">
+            <div class="icono">🛒</div>
+            <p>Tu carrito está vacío</p>
+            <p>¡Agrega productos para comenzar!</p>
+          </div>
+        `;
         totalElement.textContent = 'Total: $0.00';
+        resumenElement.style.display = 'none';
+        accionesElement.style.display = 'none';
         localStorage.setItem('carrito-chavita', JSON.stringify([]));
         return;
       }
       
       let html = '';
-      let total = 0;
+      let subtotal = 0;
       
       carrito.forEach(item => {
-        const subtotal = item.precio * (item.cantidad || 1);
+        const productoDB = productosDB[item.id] || { stock: 0 };
+        const disponible = productoDB.stock - (item.cantidad || 1);
+        const subtotalItem = item.precio * (item.cantidad || 1);
+        
+        let stockClass = '';
+        let stockText = '';
+        
+        if (disponible <= 0) {
+          stockClass = 'stock-agotado';
+          stockText = 'Agotado';
+        } else if (disponible < 5) {
+          stockClass = 'stock-bajo';
+          stockText = `Últimas ${disponible} unidades`;
+        } else {
+          stockText = `${disponible} disponibles`;
+        }
+        
+        subtotal += subtotalItem;
+        
         html += `
-          <div class="item-carrito">
+          <div class="item-carrito animate__animated animate__fadeInUp">
             <img src="${item.imagen}" class="item-imagen">
             <div class="item-info">
               <div class="item-nombre">${item.nombre}</div>
-              <div>$${item.precio.toFixed(2)} x ${item.cantidad || 1}</div>
-              <div>Subtotal: $${subtotal.toFixed(2)}</div>
+              <div class="item-precio">$${item.precio.toFixed(2)} c/u</div>
+              <div class="stock-disponible ${stockClass}">${stockText}</div>
+              
+              <div class="controles-cantidad">
+                <button class="btn-cantidad" onclick="cambiarCantidad('${item.id}', -1)" ${item.cantidad <= 1 ? 'disabled' : ''}>-</button>
+                <span class="cantidad">${item.cantidad || 1}</span>
+                <button class="btn-cantidad" onclick="cambiarCantidad('${item.id}', 1)" ${disponible <= 0 ? 'disabled' : ''}>+</button>
+              </div>
+              
+              <div class="item-subtotal">Subtotal: $${subtotalItem.toFixed(2)}</div>
             </div>
+            <button class="btn-eliminar" onclick="eliminarProducto('${item.id}')">🗑️</button>
           </div>
         `;
-        total += subtotal;
       });
       
       lista.innerHTML = html;
+      
+      // Calcular envío
+      const costoEnvio = subtotal < 899 ? 200 : 0;
+      const total = subtotal + costoEnvio;
+      
+      subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+      
+      if (costoEnvio > 0) {
+        envioElement.textContent = `$${costoEnvio.toFixed(2)}`;
+        envioElement.className = 'resumen-valor envio-costo';
+      } else {
+        envioElement.textContent = 'GRATIS';
+        envioElement.className = 'resumen-valor envio-gratis';
+      }
+      
       totalElement.textContent = `Total: $${total.toFixed(2)}`;
+      resumenElement.style.display = 'block';
+      accionesElement.style.display = 'flex';
+      
       localStorage.setItem('carrito-chavita', JSON.stringify(carrito));
     }
     
-    // 3. Escuchar mensajes para agregar productos
-    window.addEventListener('message', function(event) {
-      console.log('Mensaje recibido:', event.data);
+    // 3. Funciones auxiliares
+    function cambiarCantidad(id, cambio) {
+      const item = carrito.find(p => p.id === id);
+      const productoDB = productosDB[id] || { stock: 0 };
       
+      if (item) {
+        const nuevaCantidad = (item.cantidad || 1) + cambio;
+        
+        // Verificar stock disponible
+        if (nuevaCantidad > 0 && nuevaCantidad <= productoDB.stock) {
+          item.cantidad = nuevaCantidad;
+          actualizarCarrito();
+          
+          // Animación de feedback
+          const btn = event.target;
+          btn.classList.add('animate-added');
+          setTimeout(() => {
+            btn.classList.remove('animate-added');
+          }, 500);
+        } else if (nuevaCantidad > productoDB.stock) {
+          alert(`No hay suficiente stock. Máximo disponible: ${productoDB.stock}`);
+        }
+      }
+    }
+    
+    function eliminarProducto(id) {
+      carrito = carrito.filter(p => p.id !== id);
+      actualizarCarrito();
+    }
+    
+    // 4. Event listeners
+    document.getElementById('btn-vaciar-carrito').addEventListener('click', function() {
+      if (confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
+        carrito = [];
+        actualizarCarrito();
+      }
+    });
+    
+    document.getElementById('btn-pagar').addEventListener('click', function() {
+      if (carrito.length === 0) return;
+      
+      // Validar stock antes de pagar
+      let sinStock = false;
+      carrito.forEach(item => {
+        const productoDB = productosDB[item.id] || { stock: 0 };
+        if ((item.cantidad || 1) > productoDB.stock) {
+          sinStock = true;
+          alert(`No hay suficiente stock de ${productoDB.nombre}. Máximo disponible: ${productoDB.stock}`);
+        }
+      });
+      
+      if (sinStock) return;
+      
+      // Redirección a pasarela de pagos (simulada)
+      const total = calcularTotal();
+      alert(`Redirigiendo a pasarela de pagos. Total: $${total.toFixed(2)}`);
+      // window.location.href = 'https://pasarela-de-pagos.com?total=' + total;
+      
+      // Vaciar carrito después de pagar
+      carrito = [];
+      actualizarCarrito();
+    });
+    
+    // 5. Funciones de cálculo
+    function calcularTotal() {
+      const subtotal = carrito.reduce((sum, item) => sum + (item.precio * (item.cantidad || 1)), 0);
+      const envio = subtotal < 899 ? 200 : 0;
+      return subtotal + envio;
+    }
+    
+    // 6. Comunicación con iframe
+    window.addEventListener('message', function(event) {
       // IMPORTANTE: En producción, verifica event.origin para seguridad
       // if (event.origin !== "https://tudominio.com") return;
       
       if (event.data.action === 'agregar-producto') {
         const producto = event.data.producto;
-        console.log('Producto recibido:', producto);
+        const productoDB = productosDB[producto.id] || { stock: 0 };
         
-        // Buscar si el producto ya existe
-        const existente = carrito.find(p => p.id === producto.id);
+        // Verificar stock antes de agregar
+        const itemExistente = carrito.find(p => p.id === producto.id);
+        const cantidadActual = itemExistente ? (itemExistente.cantidad || 1) : 0;
         
-        if (existente) {
-          existente.cantidad = (existente.cantidad || 1) + 1;
+        if (cantidadActual < productoDB.stock) {
+          if (itemExistente) {
+            itemExistente.cantidad = (itemExistente.cantidad || 1) + 1;
+          } else {
+            producto.cantidad = 1;
+            carrito.push(producto);
+          }
+          
+          localStorage.setItem('carrito-chavita', JSON.stringify(carrito));
+          actualizarCarrito();
         } else {
-          producto.cantidad = 1;
-          carrito.push(producto);
+          alert(`No hay suficiente stock de ${productoDB.nombre}. Máximo disponible: ${productoDB.stock}`);
         }
-        
-        localStorage.setItem('carrito-chavita', JSON.stringify(carrito));
-        actualizarCarrito();
       }
     });
-
-    // 4. Sincronización al cargar y entre pestañas
-    window.addEventListener('DOMContentLoaded', actualizarCarrito);
     
-    window.addEventListener('storage', function(e) {
-      if (e.key === 'carrito-chavita') {
-        carrito = JSON.parse(e.newValue) || [];
-        actualizarCarrito();
-      }
+    // 7. Vaciar carrito al cerrar la página/pestaña
+    window.addEventListener('beforeunload', function() {
+      localStorage.removeItem('carrito-chavita');
     });
-
-    // 5. Inicializar
-    actualizarCarrito();
+    
+    // 8. Inicialización
+    window.addEventListener('DOMContentLoaded', function() {
+      actualizarCarrito();
+      
+      // Escuchar cambios en el localStorage desde otras pestañas
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'carrito-chavita') {
+          carrito = JSON.parse(e.newValue) || [];
+          actualizarCarrito();
+        }
+      });
+    });
   </script>
 </body>
 </html>
