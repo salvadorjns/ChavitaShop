@@ -4,67 +4,49 @@
   <meta charset="UTF-8">
   <title>Carrito - ChavitaShop</title>
   <style>
-    :root {
-      --color-primario: #e83e8c;
-      --color-secundario: #ff6b9e;
-      --color-fondo: #fff5f9;
-    }
-    
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: Arial, sans-serif;
       margin: 0;
       padding: 20px;
-      background-color: var(--color-fondo);
+      background: #fff5f9;
     }
-    
     #carrito-container {
       max-width: 800px;
       margin: 0 auto;
       background: white;
       border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-    
-    .producto-item {
+    .item-carrito {
       display: flex;
       align-items: center;
       padding: 15px;
       margin-bottom: 15px;
-      background: #fff;
-      border: 1px solid #eee;
+      background: #f9f9f9;
       border-radius: 8px;
     }
-    
-    .producto-imagen {
+    .item-imagen {
       width: 80px;
       height: 80px;
       object-fit: cover;
       margin-right: 15px;
       border-radius: 4px;
     }
-    
-    .producto-info {
+    .item-info {
       flex-grow: 1;
     }
-    
-    .producto-nombre {
+    .item-nombre {
       font-weight: bold;
+      color: #e83e8c;
       margin-bottom: 5px;
-      color: var(--color-primario);
     }
-    
-    .producto-precio {
-      color: #666;
-    }
-    
     .carrito-vacio {
       text-align: center;
-      padding: 30px;
+      padding: 40px 20px;
       color: #888;
     }
-    
-    .carrito-total {
+    #total-carrito {
       font-weight: bold;
       font-size: 1.2em;
       text-align: right;
@@ -72,72 +54,83 @@
       padding-top: 15px;
       border-top: 1px solid #eee;
     }
-    
-    .btn-eliminar {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
   <div id="carrito-container">
     <h1>🛒 Tu Carrito de Compras</h1>
-    <div id="carrito">Cargando...</div>
-    <div id="total" class="carrito-total">Total: $0.00</div>
+    <div id="lista-carrito">
+      <div class="carrito-vacio">
+        <p>Tu carrito está vacío</p>
+      </div>
+    </div>
+    <div id="total-carrito">Total: $0.00</div>
   </div>
 
   <script>
-    // Función para actualizar la visualización del carrito
+    // 1. Estado inicial del carrito
+    let carrito = JSON.parse(localStorage.getItem('carrito-chavita')) || [];
+    
+    // 2. Función para actualizar la visualización
     function actualizarCarrito() {
-      const carrito = JSON.parse(localStorage.getItem('carrito-chavita') || '[]');
-      const contenedor = document.getElementById('carrito');
-      const totalElement = document.getElementById('total');
+      const lista = document.getElementById('lista-carrito');
+      const totalElement = document.getElementById('total-carrito');
       
       if (carrito.length === 0) {
-        contenedor.innerHTML = '<div class="carrito-vacio"><p>Tu carrito está vacío</p></div>';
+        lista.innerHTML = '<div class="carrito-vacio"><p>Tu carrito está vacío</p></div>';
         totalElement.textContent = 'Total: $0.00';
         return;
       }
-
-      // Calcular total
-      const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
       
-      // Mostrar productos
-      contenedor.innerHTML = carrito.map(item => `
-        <div class="producto-item">
-          <img src="${item.imagen}" class="producto-imagen">
-          <div class="producto-info">
-            <div class="producto-nombre">${item.nombre} (x${item.cantidad})</div>
-            <div class="producto-precio">$${item.precio.toFixed(2)} c/u</div>
+      // Generar HTML de los productos
+      let html = '';
+      let total = 0;
+      
+      carrito.forEach(item => {
+        html += `
+          <div class="item-carrito">
+            <img src="${item.imagen}" class="item-imagen">
+            <div class="item-info">
+              <div class="item-nombre">${item.nombre}</div>
+              <div>$${item.precio.toFixed(2)}</div>
+            </div>
           </div>
-          <button class="btn-eliminar" onclick="eliminarDelCarrito('${item.id}')">Eliminar</button>
-        </div>
-      `).join('');
+        `;
+        total += item.precio;
+      });
       
+      lista.innerHTML = html;
       totalElement.textContent = `Total: $${total.toFixed(2)}`;
-    }
-
-    // Función para eliminar productos
-    function eliminarDelCarrito(id) {
-      let carrito = JSON.parse(localStorage.getItem('carrito-chavita') || '[]');
-      carrito = carrito.filter(item => item.id !== id);
+      
+      // Guardar en localStorage
       localStorage.setItem('carrito-chavita', JSON.stringify(carrito));
-      actualizarCarrito();
     }
-
-    // Escuchar actualizaciones
+    
+    // 3. Escuchar mensajes para agregar productos
     window.addEventListener('message', function(event) {
-      if (event.data.action === 'carrito-actualizado') {
-        actualizarCarrito();
+      // Verificar origen del mensaje para seguridad
+      if (event.origin === 'https://sites.google.com' || 
+          event.origin === 'https://salvadorjns.github.io') {
+        if (event.data.action === 'agregar-producto') {
+          const producto = event.data.producto;
+          
+          // Buscar si el producto ya existe
+          const existente = carrito.find(p => p.id === producto.id);
+          
+          if (existente) {
+            existente.cantidad = (existente.cantidad || 1) + 1;
+          } else {
+            producto.cantidad = 1;
+            carrito.push(producto);
+          }
+          
+          actualizarCarrito();
+        }
       }
     });
 
-    // Inicializar al cargar
-    window.onload = actualizarCarrito;
+    // 4. Inicializar al cargar
+    actualizarCarrito();
   </script>
 </body>
 </html>
