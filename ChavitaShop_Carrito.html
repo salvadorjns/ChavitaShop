@@ -2,54 +2,142 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Carrito</title>
+  <title>Carrito - ChavitaShop</title>
   <style>
-    body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
-    .producto { border: 1px solid #ccc; margin: 10px; padding: 10px; background: white; display: flex; gap: 10px; }
-    img { width: 150px; }
+    :root {
+      --color-primario: #e83e8c;
+      --color-secundario: #ff6b9e;
+      --color-fondo: #fff5f9;
+    }
+    
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: var(--color-fondo);
+    }
+    
+    #carrito-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    
+    .producto-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      margin-bottom: 15px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 8px;
+    }
+    
+    .producto-imagen {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      margin-right: 15px;
+      border-radius: 4px;
+    }
+    
+    .producto-info {
+      flex-grow: 1;
+    }
+    
+    .producto-nombre {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: var(--color-primario);
+    }
+    
+    .producto-precio {
+      color: #666;
+    }
+    
+    .carrito-vacio {
+      text-align: center;
+      padding: 30px;
+      color: #888;
+    }
+    
+    .carrito-total {
+      font-weight: bold;
+      font-size: 1.2em;
+      text-align: right;
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+    }
+    
+    .btn-eliminar {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <h2>🛍️ Tu Carrito</h2>
-  <div id="carrito"></div>
+  <div id="carrito-container">
+    <h1>🛒 Tu Carrito de Compras</h1>
+    <div id="carrito">Cargando...</div>
+    <div id="total" class="carrito-total">Total: $0.00</div>
+  </div>
 
   <script>
-    function getCookie(name) {
-      const value = "; " + document.cookie;
-      const parts = value.split("; " + name + "=");
-      if (parts.length === 2) return parts.pop().split(";").shift();
-    }
-
-    function mostrarCarrito() {
-      const carritoDiv = document.getElementById('carrito');
-      const cookieCarrito = getCookie("carrito");
-
-      if (!cookieCarrito) {
-        carritoDiv.innerHTML = "<p>El carrito está vacío.</p>";
-        return;
-      }
-
-      const carrito = JSON.parse(decodeURIComponent(cookieCarrito));
+    // Función para actualizar la visualización del carrito
+    function actualizarCarrito() {
+      const carrito = JSON.parse(localStorage.getItem('carrito-chavita') || '[]');
+      const contenedor = document.getElementById('carrito');
+      const totalElement = document.getElementById('total');
+      
       if (carrito.length === 0) {
-        carritoDiv.innerHTML = "<p>El carrito está vacío.</p>";
+        contenedor.innerHTML = '<div class="carrito-vacio"><p>Tu carrito está vacío</p></div>';
+        totalElement.textContent = 'Total: $0.00';
         return;
       }
 
-      carrito.forEach(producto => {
-        const div = document.createElement('div');
-        div.className = 'producto';
-        div.innerHTML = `
-          <img src="${producto.imagen}" alt="${producto.nombre}">
-          <div>
-            <h4>${producto.nombre}</h4>
-            <p>Precio: $${producto.precio.toFixed(2)}</p>
+      // Calcular total
+      const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+      
+      // Mostrar productos
+      contenedor.innerHTML = carrito.map(item => `
+        <div class="producto-item">
+          <img src="${item.imagen}" class="producto-imagen">
+          <div class="producto-info">
+            <div class="producto-nombre">${item.nombre} (x${item.cantidad})</div>
+            <div class="producto-precio">$${item.precio.toFixed(2)} c/u</div>
           </div>
-        `;
-        carritoDiv.appendChild(div);
-      });
+          <button class="btn-eliminar" onclick="eliminarDelCarrito('${item.id}')">Eliminar</button>
+        </div>
+      `).join('');
+      
+      totalElement.textContent = `Total: $${total.toFixed(2)}`;
     }
 
-    mostrarCarrito();
+    // Función para eliminar productos
+    function eliminarDelCarrito(id) {
+      let carrito = JSON.parse(localStorage.getItem('carrito-chavita') || '[]');
+      carrito = carrito.filter(item => item.id !== id);
+      localStorage.setItem('carrito-chavita', JSON.stringify(carrito));
+      actualizarCarrito();
+    }
+
+    // Escuchar actualizaciones
+    window.addEventListener('message', function(event) {
+      if (event.data.action === 'carrito-actualizado') {
+        actualizarCarrito();
+      }
+    });
+
+    // Inicializar al cargar
+    window.onload = actualizarCarrito;
   </script>
 </body>
 </html>
