@@ -2,48 +2,54 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Carrito de Compras</title>
+  <title>Carrito</title>
   <style>
-    body { font-family: Arial; background: #fff; padding: 20px; }
-    .producto { border-bottom: 1px solid #ccc; padding: 10px 0; display: flex; gap: 10px; }
-    .producto img { width: 80px; }
-    .producto-info { flex: 1; }
-    .precio { font-weight: bold; }
+    body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
+    .producto { border: 1px solid #ccc; margin: 10px; padding: 10px; background: white; display: flex; gap: 10px; }
+    img { width: 150px; }
   </style>
 </head>
 <body>
-  <h2>🛒 Tu Carrito</h2>
-  <div id="contenedorCarrito"></div>
+  <h2>🛍️ Tu Carrito</h2>
+  <div id="carrito"></div>
 
   <script>
-    function obtenerProductosDeCookies() {
-      const match = document.cookie.match(/productos=([^;]+)/);
-      return match ? JSON.parse(decodeURIComponent(match[1])) : [];
+    function getCookie(name) {
+      const value = "; " + document.cookie;
+      const parts = value.split("; " + name + "=");
+      if (parts.length === 2) return parts.pop().split(";").shift();
     }
 
-    function actualizarCarrito() {
-      const productos = obtenerProductosDeCookies();
-      const contenedor = document.getElementById("contenedorCarrito");
-      contenedor.innerHTML = "";
+    function mostrarCarrito() {
+      const carritoDiv = document.getElementById('carrito');
+      const cookieCarrito = getCookie("carrito");
 
-      if (productos.length === 0) {
-        contenedor.innerHTML = "<p>Tu carrito está vacío.</p>";
+      if (!cookieCarrito) {
+        carritoDiv.innerHTML = "<p>El carrito está vacío.</p>";
         return;
       }
 
-      productos.forEach(p => {
-        const div = document.createElement("div");
-        div.className = "producto";
+      const carrito = JSON.parse(decodeURIComponent(cookieCarrito));
+      if (carrito.length === 0) {
+        carritoDiv.innerHTML = "<p>El carrito está vacío.</p>";
+        return;
+      }
+
+      carrito.forEach(producto => {
+        const div = document.createElement('div');
+        div.className = 'producto';
         div.innerHTML = `
-          <img src="${p.imagen}" alt="${p.nombre}">
-          <div class="producto-info">${p.nombre}</div>
-          <div class="precio">$${p.precio.toFixed(2)}</div>
+          <img src="${producto.imagen}" alt="${producto.nombre}">
+          <div>
+            <h4>${producto.nombre}</h4>
+            <p>Precio: $${producto.precio.toFixed(2)}</p>
+          </div>
         `;
-        contenedor.appendChild(div);
+        carritoDiv.appendChild(div);
       });
     }
 
-    actualizarCarrito();
+    mostrarCarrito();
   </script>
 </body>
 </html>
