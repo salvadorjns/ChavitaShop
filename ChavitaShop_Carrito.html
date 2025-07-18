@@ -2,39 +2,44 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Carrito de Comp31ras</title>
+  <title>Carrito de Compras</title>
   <style>
-    body { background: #fff; font-family: sans-serif; padding: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    button { padding: 5px 10px; }
+    body { font-family: Arial; background: #fff; color: #333; }
+    #carrito { border-top: 1px solid #ccc; margin-top: 1em; padding-top: 1em; }
   </style>
 </head>
 <body>
-  <h2>Carrito</h2>
-  <ul id="lista-carrito"></ul>
+  <h2>🛒 Carritoooo111o</h2>
+  <div id="carrito"></div>
 
   <script>
-    function mostrarCarrito(carrito) {
-      const lista = document.getElementById("lista-carrito");
-      lista.innerHTML = ""; // Limpia antes de agregar
-      carrito.forEach(item => {
-        const li = document.createElement("li");
-        li.textContent = `${item.nombre} (x${item.cantidad})`;
-        lista.appendChild(li);
+    const carrito = [];
+
+    function renderizarCarrito() {
+      const contenedor = document.getElementById('carrito');
+      contenedor.innerHTML = '';
+      carrito.forEach(prod => {
+        const div = document.createElement('div');
+        div.textContent = `${prod.nombre} - $${prod.precio} x ${prod.cantidad}`;
+        contenedor.appendChild(div);
       });
     }
 
-    // Escuchar mensajes desde la página principal
-    window.addEventListener("message", (event) => {
-      if (event.data.type === "actualizarCarrito") {
-        mostrarCarrito(event.data.carrito);
+    // Escuchar mensajes desde el exterior (Google Sites)
+    window.addEventListener('message', (event) => {
+      if (event.origin !== 'https://sites.google.com') return;
+
+      const { tipo, producto } = event.data;
+      if (tipo === 'agregarProducto' && producto) {
+        const existente = carrito.find(p => p.id === producto.id);
+        if (existente) {
+          existente.cantidad += producto.cantidad;
+        } else {
+          carrito.push({ ...producto });
+        }
+        renderizarCarrito();
       }
     });
-
-    // Mostrar el carrito al cargar por primera vez
-    const carritoInicial = JSON.parse(localStorage.getItem("carrito")) || [];
-    mostrarCarrito(carritoInicial);
   </script>
 </body>
 </html>
