@@ -3,67 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrito de Compras</title>
+    <title>Carrito de Compras - ChavitaShop</title>
     <style>
-        :root {
-            --color-primario: #ff6b6b;
-            --color-secundario: #ff8e8e;
-            --color-fondo: #fff5f5;
-            --color-texto: #333;
-            --color-stock: #4CAF50;
-            --color-sinstock: #f44336;
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
         }
         
         #carrito-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 320px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
             background: white;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.15);
-            padding: 15px;
-            z-index: 1000;
-            font-family: 'Arial', sans-serif;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
         
-        .carrito-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .carrito-title {
-            font-size: 1.2rem;
-            color: var(--color-primario);
-            margin: 0;
-        }
-        
-        .carrito-count {
-            background: var(--color-primario);
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
+        h1 {
+            color: #e83e8c;
+            text-align: center;
+            margin-bottom: 30px;
         }
         
         #lista-carrito {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 15px;
+            margin-bottom: 30px;
         }
         
         .item-carrito {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #f0f0f0;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            transition: background 0.3s;
+        }
+        
+        .item-carrito:hover {
+            background-color: #f9f9f9;
         }
         
         .item-info {
@@ -72,300 +50,245 @@
         
         .item-nombre {
             font-weight: bold;
-            margin-bottom: 5px;
+            font-size: 1.1rem;
+            color: #333;
         }
         
         .item-precio {
-            color: var(--color-primario);
+            color: #e83e8c;
             font-size: 0.9rem;
         }
         
         .item-cantidad {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         
         .btn-cantidad {
-            background: #f0f0f0;
+            background: #f1f1f1;
             border: none;
-            width: 25px;
-            height: 25px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             cursor: pointer;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background 0.3s;
+        }
+        
+        .btn-cantidad:hover {
+            background: #e2e2e2;
         }
         
         .btn-eliminar {
-            background: var(--color-sinstock);
+            background: #dc3545;
             color: white;
             border: none;
-            padding: 3px 8px;
-            border-radius: 3px;
+            padding: 5px 10px;
+            border-radius: 5px;
             cursor: pointer;
-            margin-left: 10px;
-            font-size: 0.8rem;
+            margin-left: 15px;
+            transition: background 0.3s;
         }
         
-        .carrito-footer {
-            border-top: 1px solid #f0f0f0;
-            padding-top: 15px;
+        .btn-eliminar:hover {
+            background: #c82333;
         }
         
         .carrito-total {
             display: flex;
             justify-content: space-between;
+            font-size: 1.2rem;
             font-weight: bold;
-            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 20px;
         }
         
         .btn-pagar {
-            background: var(--color-stock);
+            background: #28a745;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 12px 20px;
             border-radius: 5px;
             cursor: pointer;
             width: 100%;
+            font-size: 1.1rem;
             font-weight: bold;
             transition: background 0.3s;
         }
         
         .btn-pagar:hover {
-            background: #45a049;
+            background: #218838;
         }
         
-        .stock-disponible {
-            font-size: 0.8rem;
-            color: var(--color-stock);
-            margin-top: 3px;
+        .btn-pagar:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
         }
         
-        .stock-agotado {
-            font-size: 0.8rem;
-            color: var(--color-sinstock);
-            margin-top: 3px;
+        .carrito-vacio {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+        }
+        
+        @media (max-width: 768px) {
+            #carrito-container {
+                padding: 15px;
+            }
+            
+            .item-carrito {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .item-cantidad {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: space-between;
+            }
         }
     </style>
 </head>
 <body>
     <div id="carrito-container">
-        <div class="carrito-header">
-            <h2 class="carrito-title">Tu Carrito</h2>
-            <div class="carrito-count" id="contador">0</div>
+        <h1>🛒 Tu Carrito de Compras</h1>
+        
+        <div id="lista-carrito">
+            <!-- Los productos del carrito aparecerán aquí -->
         </div>
         
-        <div id="lista-carrito"></div>
-        
-        <div class="carrito-footer">
-            <div class="carrito-total">
-                <span>Total:</span>
-                <span>$<span id="total">0.00</span></span>
-            </div>
-            <button class="btn-pagar" id="btn-pagar">Finalizar Compra</button>
+        <div class="carrito-total">
+            <span>Total:</span>
+            <span>$<span id="total-carrito">0.00</span></span>
         </div>
+        
+        <button class="btn-pagar" id="btn-pagar" disabled>Finalizar Compra</button>
     </div>
 
     <script>
-        // Base de datos de productos y stock
-        const inventario = {
-            'Consolador Realista': { stock: 10, precio: 29.99 },
-            'Vibrador con Ventosa': { stock: 8, precio: 24.99 },
-            'Anillo Vibrador': { stock: 15, precio: 19.99 }
-        };
-
         // Estado del carrito
         let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
         let total = parseFloat(localStorage.getItem('total')) || 0;
-
-        // Actualizar interfaz del carrito
-        function actualizarCarrito() {
+        
+        // Función para actualizar la interfaz del carrito
+        function actualizarCarritoUI() {
             const lista = document.getElementById('lista-carrito');
-            const contador = document.getElementById('contador');
-            const totalElement = document.getElementById('total');
+            const totalElement = document.getElementById('total-carrito');
+            const btnPagar = document.getElementById('btn-pagar');
             
-            // Actualizar contador
-            const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
-            contador.textContent = totalItems;
+            // Vaciar lista
+            lista.innerHTML = '';
             
-            // Actualizar lista
-            lista.innerHTML = carrito.map(item => {
-                const producto = inventario[item.nombre];
-                const disponible = producto.stock - item.cantidad;
-                
-                return `
-                    <div class="item-carrito">
-                        <div class="item-info">
-                            <div class="item-nombre">${item.nombre}</div>
-                            <div class="item-precio">$${producto.precio.toFixed(2)} c/u</div>
-                            ${disponible > 0 ? 
-                                `<div class="stock-disponible">${disponible} disponibles</div>` : 
-                                `<div class="stock-agotado">¡Últimas unidades!</div>`}
-                        </div>
-                        <div class="item-cantidad">
-                            <button class="btn-cantidad" onclick="modificarCantidad('${item.nombre}', -1)">-</button>
-                            <span>${item.cantidad}</span>
-                            <button class="btn-cantidad" onclick="modificarCantidad('${item.nombre}', 1)" ${disponible <= 0 ? 'disabled style="opacity:0.5"' : ''}>+</button>
-                            <button class="btn-eliminar" onclick="eliminarProducto('${item.nombre}')">Eliminar</button>
-                        </div>
+            // Si el carrito está vacío
+            if (carrito.length === 0) {
+                lista.innerHTML = `
+                    <div class="carrito-vacio">
+                        <p>Tu carrito está vacío</p>
+                        <p>¡Agrega productos para comenzar!</p>
                     </div>
                 `;
-            }).join('');
+                totalElement.textContent = '0.00';
+                btnPagar.disabled = true;
+                return;
+            }
+            
+            // Mostrar cada producto del carrito
+            carrito.forEach((item, index) => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'item-carrito';
+                itemElement.innerHTML = `
+                    <div class="item-info">
+                        <div class="item-nombre">${item.nombre}</div>
+                        <div class="item-precio">$${item.precio.toFixed(2)} c/u</div>
+                    </div>
+                    <div class="item-cantidad">
+                        <button class="btn-cantidad" onclick="modificarCantidad(${index}, -1)">-</button>
+                        <span>${item.cantidad}</span>
+                        <button class="btn-cantidad" onclick="modificarCantidad(${index}, 1)">+</button>
+                        <button class="btn-eliminar" onclick="eliminarProducto(${index})">Eliminar</button>
+                    </div>
+                `;
+                lista.appendChild(itemElement);
+            });
             
             // Actualizar total
             totalElement.textContent = total.toFixed(2);
-            
-            // Habilitar/deshabilitar botón de pago
-            document.getElementById('btn-pagar').disabled = carrito.length === 0;
+            btnPagar.disabled = false;
         }
-
-        // Modificar cantidad de un producto
-        function modificarCantidad(nombre, cambio) {
-            const producto = inventario[nombre];
-            const itemIndex = carrito.findIndex(item => item.nombre === nombre);
+        
+        // Función para modificar la cantidad de un producto
+        function modificarCantidad(index, cambio) {
+            const nuevaCantidad = carrito[index].cantidad + cambio;
             
-            if (itemIndex !== -1) {
-                const nuevaCantidad = carrito[itemIndex].cantidad + cambio;
-                
-                // Verificar stock disponible
-                if (nuevaCantidad <= 0) {
-                    eliminarProducto(nombre);
-                    return;
-                }
-                
-                if (nuevaCantidad > producto.stock) {
-                    alert(`No hay suficiente stock. Máximo disponible: ${producto.stock}`);
-                    return;
-                }
-                
-                // Actualizar cantidad y total
-                total += cambio * producto.precio;
-                carrito[itemIndex].cantidad = nuevaCantidad;
-                
-                guardarCarrito();
-                actualizarCarrito();
-            }
-        }
-
-        // Eliminar producto del carrito
-        function eliminarProducto(nombre) {
-            const itemIndex = carrito.findIndex(item => item.nombre === nombre);
-            
-            if (itemIndex !== -1) {
-                const producto = inventario[nombre];
-                total -= carrito[itemIndex].cantidad * producto.precio;
-                carrito.splice(itemIndex, 1);
-                
-                guardarCarrito();
-                actualizarCarrito();
-            }
-        }
-
-        // Añadir producto al carrito
-        function agregarAlCarrito(nombre) {
-            const producto = inventario[nombre];
-            
-            if (!producto) {
-                console.error('Producto no encontrado:', nombre);
+            // Si la cantidad llega a 0, eliminar el producto
+            if (nuevaCantidad <= 0) {
+                eliminarProducto(index);
                 return;
             }
             
-            const itemIndex = carrito.findIndex(item => item.nombre === nombre);
-            const stockDisponible = producto.stock - (itemIndex !== -1 ? carrito[itemIndex].cantidad : 0);
+            // Actualizar cantidad y total
+            total += cambio * carrito[index].precio;
+            carrito[index].cantidad = nuevaCantidad;
             
-            if (stockDisponible <= 0) {
-                alert('¡Producto agotado!');
-                return;
-            }
-            
-            if (itemIndex !== -1) {
-                carrito[itemIndex].cantidad += 1;
-            } else {
-                carrito.push({
-                    nombre: nombre,
-                    cantidad: 1
-                });
-            }
-            
-            total += producto.precio;
             guardarCarrito();
-            actualizarCarrito();
-            
-            // Mostrar confirmación visual
-            mostrarConfirmacion(nombre);
+            actualizarCarritoUI();
         }
-
-        // Mostrar confirmación de producto añadido
-        function mostrarConfirmacion(nombre) {
-            const notification = document.createElement('div');
-            notification.style.position = 'fixed';
-            notification.style.bottom = '100px';
-            notification.style.right = '20px';
-            notification.style.backgroundColor = 'var(--color-primario)';
-            notification.style.color = 'white';
-            notification.style.padding = '10px 15px';
-            notification.style.borderRadius = '5px';
-            notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-            notification.style.zIndex = '1001';
-            notification.style.animation = 'fadeInOut 2.5s ease-in-out';
-            notification.textContent = `✓ ${nombre} añadido`;
+        
+        // Función para eliminar un producto
+        function eliminarProducto(index) {
+            total -= carrito[index].precio * carrito[index].cantidad;
+            carrito.splice(index, 1);
             
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 2500);
+            guardarCarrito();
+            actualizarCarritoUI();
         }
-
-        // Guardar carrito en localStorage
+        
+        // Función para guardar el carrito en localStorage
         function guardarCarrito() {
             localStorage.setItem('carrito', JSON.stringify(carrito));
             localStorage.setItem('total', total.toString());
         }
-
-        // Finalizar compra
-        document.getElementById('btn-pagar').addEventListener('click', () => {
+        
+        // Función para verificar cambios en el carrito
+        function verificarCarrito() {
+            const carritoActual = JSON.parse(localStorage.getItem('carrito'));
+            
+            // Si hay cambios en el carrito
+            if (JSON.stringify(carritoActual) !== JSON.stringify(carrito)) {
+                carrito = carritoActual || [];
+                total = parseFloat(localStorage.getItem('total')) || 0;
+                actualizarCarritoUI();
+            }
+        }
+        
+        // Función para finalizar la compra
+        function finalizarCompra() {
             if (carrito.length === 0) return;
             
             // Aquí puedes implementar la conexión con Google Sheets
-            alert(`Pedido realizado por $${total.toFixed(2)}\nGracias por tu compra!`);
+            alert(`¡Compra realizada por $${total.toFixed(2)}!\nGracias por tu compra.`);
             
-            // Actualizar stock (en un sistema real, esto debería hacerse en el backend)
-            carrito.forEach(item => {
-                inventario[item.nombre].stock -= item.cantidad;
-            });
-            
-            // Limpiar carrito
+            // Vaciar el carrito
             carrito = [];
             total = 0;
             guardarCarrito();
-            actualizarCarrito();
-        });
-
-        // Escuchar mensajes de los botones externos
-        window.addEventListener('message', (event) => {
-            if (event.data.action === 'agregarAlCarrito') {
-                agregarAlCarrito(event.data.nombre);
-            }
-        });
-
-        // Inicializar
-        actualizarCarrito();
-
-        // Estilos para la animación de notificación
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeInOut {
-                0% { opacity: 0; transform: translateY(10px); }
-                20% { opacity: 1; transform: translateY(0); }
-                80% { opacity: 1; transform: translateY(0); }
-                100% { opacity: 0; transform: translateY(10px); }
-            }
-        `;
-        document.head.appendChild(style);
+            actualizarCarritoUI();
+        }
+        
+        // Configurar el botón de pagar
+        document.getElementById('btn-pagar').addEventListener('click', finalizarCompra);
+        
+        // Verificar cambios en el carrito cada segundo
+        setInterval(verificarCarrito, 1000);
+        
+        // Inicializar el carrito al cargar la página
+        window.onload = actualizarCarritoUI;
     </script>
 </body>
 </html>
