@@ -87,16 +87,18 @@
       let total = 0;
       
       carrito.forEach(item => {
+        const subtotal = item.precio * (item.cantidad || 1);
         html += `
           <div class="item-carrito">
             <img src="${item.imagen}" class="item-imagen">
             <div class="item-info">
               <div class="item-nombre">${item.nombre}</div>
-              <div>$${item.precio.toFixed(2)}</div>
+              <div>$${item.precio.toFixed(2)} x ${item.cantidad || 1}</div>
+              <div>Subtotal: $${subtotal.toFixed(2)}</div>
             </div>
           </div>
         `;
-        total += item.precio;
+        total += subtotal;
       });
       
       lista.innerHTML = html;
@@ -106,30 +108,43 @@
       localStorage.setItem('carrito-chavita', JSON.stringify(carrito));
     }
     
-    // 3. Escuchar mensajes para agregar productos
+    // 3. Escuchar mensajes para agregar productos (versión modificada)
     window.addEventListener('message', function(event) {
-      // Verificar origen del mensaje para seguridad
-      if (event.origin === 'https://sites.google.com' || 
-          event.origin === 'https://salvadorjns.github.io') {
-        if (event.data.action === 'agregar-producto') {
-          const producto = event.data.producto;
-          
-          // Buscar si el producto ya existe
-          const existente = carrito.find(p => p.id === producto.id);
-          
-          if (existente) {
-            existente.cantidad = (existente.cantidad || 1) + 1;
-          } else {
-            producto.cantidad = 1;
-            carrito.push(producto);
-          }
-          
-          actualizarCarrito();
+      // Para desarrollo, aceptamos mensajes de cualquier origen ('*')
+      // En producción deberías especificar tus dominios seguros
+      if (event.data.action === 'agregar-producto') {
+        const producto = event.data.producto;
+        
+        let carrito = JSON.parse(localStorage.getItem('carrito-chavita')) || [];
+        
+        const existente = carrito.find(p => p.id === producto.id);
+        if (existente) {
+          existente.cantidad = (existente.cantidad || 1) + 1;
+        } else {
+          producto.cantidad = 1;
+          carrito.push(producto);
         }
+        
+        localStorage.setItem('carrito-chavita', JSON.stringify(carrito));
+        actualizarCarrito();
       }
     });
 
-    // 4. Inicializar al cargar
+    // 4. Sincronización al cargar (nueva funcionalidad)
+    window.addEventListener('DOMContentLoaded', () => {
+      // Sincronizar con localStorage al cargar
+      actualizarCarrito();
+      
+      // Escuchar cambios en localStorage desde otras pestañas
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'carrito-chavita') {
+          carrito = JSON.parse(e.newValue) || [];
+          actualizarCarrito();
+        }
+      });
+    });
+
+    // 5. Inicializar al cargar (compatibilidad)
     actualizarCarrito();
   </script>
 </body>
